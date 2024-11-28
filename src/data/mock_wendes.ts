@@ -1,4 +1,4 @@
-// src/data/mock_wendes.js
+// src/data/mock_wendes.ts
 import { WendeType } from '../enums/wendeType';
 import { AstronomischEvent} from '../enums/astronomischEvent';
 
