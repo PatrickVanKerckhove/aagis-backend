@@ -1,0 +1,37 @@
+{
+  "name": "aagis-backend",
+  "description": "Application for the course Web Services.",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "repository": "git@github.com:HOGENT-frontendweb/frontendweb-2425-PatrickVanKerckhove.git",
+  "license": "MIT",
+  "packageManager": "yarn@4.5.1",
+  "private": true,
+  "scripts": {
+    "start:dev": "tsx watch --env-file .env --inspect=0.0.0.0:9001 src/index.ts",
+    "build": "tsc",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@koa/cors": "^5.0.0",
+    "@koa/router": "^13.1.0",
+    "config": "^3.3.12",
+    "koa": "^2.15.3",
+    "koa-bodyparser": "^4.4.1",
+    "winston": "^3.15.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.13.0",
+    "@stylistic/eslint-plugin": "^2.9.0",
+    "@types/config": "^3.3.5",
+    "@types/koa": "^2.15.0",
+    "@types/koa-bodyparser": "^4.3.12",
+    "@types/koa__cors": "^5.0.0",
+    "@types/koa__router": "^12.0.4",
+    "@types/node": "^22.7.7",
+    "eslint": "^9.13.0",
+    "tsx": "^4.19.1",
+    "typescript": "~5.5.0",
+    "typescript-eslint": "^8.10.0"
+  }
+}
