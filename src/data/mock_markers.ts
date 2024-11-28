@@ -1,5 +1,4 @@
 // src/data/mock_markers.ts
-
 const ORIENTATIEMARKERS_DATA = [
   { //Stonehenge
     id: 1,
