@@ -11,3 +11,9 @@
 
 #!.yarn/cache
 .pnp.*
+
+# Environment variables
+.env
+
+# Log files
+test.log
