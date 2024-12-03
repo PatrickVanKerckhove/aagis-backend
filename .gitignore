@@ -13,7 +13,7 @@
 .pnp.*
 
 # Environment variables
-.env
+.env*
 
 # Log files
 test.log
