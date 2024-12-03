@@ -15,9 +15,11 @@
   "dependencies": {
     "@koa/cors": "^5.0.0",
     "@koa/router": "^13.1.0",
+    "@prisma/client": "^6.0.1",
     "config": "^3.3.12",
     "koa": "^2.15.3",
     "koa-bodyparser": "^4.4.1",
+    "prisma": "^6.0.1",
     "winston": "^3.15.0"
   },
   "devDependencies": {
@@ -33,5 +35,8 @@
     "tsx": "^4.19.1",
     "typescript": "~5.5.0",
     "typescript-eslint": "^8.10.0"
+  },
+  "prisma": {
+      "schema": "src/data/schema.prisma"
   }
 }
