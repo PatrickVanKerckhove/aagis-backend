@@ -17,3 +17,6 @@
 
 # Log files
 test.log
+
+node_modules/
+
