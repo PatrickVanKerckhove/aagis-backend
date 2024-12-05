@@ -1,12 +1,12 @@
 // src/index.ts
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
-import { getLogger } from '../core/logging';
+import { getLogger } from './core/logging';
 import installRest from './rest';
 import config from 'config';
 import koaCors from '@koa/cors';
 
-const CORS_ORIGINS = config.get<string[]>('cors.origins'); // 👈 2
+const CORS_ORIGINS = config.get<string[]>('cors.origins');
 const CORS_MAX_AGE = config.get<number>('cors.maxAge');
 
 const app = new Koa();

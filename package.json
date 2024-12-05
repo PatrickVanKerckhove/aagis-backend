@@ -37,6 +37,7 @@
     "typescript-eslint": "^8.10.0"
   },
   "prisma": {
-      "schema": "src/data/schema.prisma"
+      "schema": "src/data/schema.prisma",
+      "seed": "tsx ./src/data/seed.ts"
   }
 }

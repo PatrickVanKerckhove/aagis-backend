@@ -16,7 +16,7 @@ datasource db {
 model ArcheologischeSite{
   @@map("archeosites")     // Set the table name to "archeosites"
   id           Int         @id @default(autoincrement()) @db.UnsignedInt
-  naam         String      @unique(map: "idx_archeosite_naam_unique") @db.VarChar(255)
+  naam         String      @db.VarChar(255)
   land         String      @db.VarChar(255)
   beschrijving String?     @db.Text
   breedtegraad Decimal     @db.Decimal(10, 8) //10 cijfers in totaal, 8 na komma
@@ -52,14 +52,14 @@ model Wende {
   orientatieMarkers OrientatieMarker[] @relation("WendeToMarkers")
 }
 enum WendeType {
-  zomerZonnewende
-  winterZonnewende
-  noordGroteMaanwende
-  noordKleineMaanwende
-  zuidGroteMaanwende
-  zuidKleineMaanwende
+  ZomerZonnewende
+  WinterZonnewende
+  NoordGroteMaanwende
+  NoordKleineMaanwende
+  ZuidGroteMaanwende
+  ZuidKleineMaanwende
 }
 enum AstronomischEvent {
-  ondergang
-  opgang
+  Ondergang
+  Opgang
 }
