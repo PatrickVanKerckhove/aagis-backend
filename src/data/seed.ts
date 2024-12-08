@@ -6,8 +6,6 @@ const prisma = new PrismaClient();
 async function main() {
   // Seed archeologischeSites
   // ==========
-  await prisma.archeologischeSite.deleteMany({}); // eerst leegmaken
-
   await prisma.archeologischeSite.createMany({
     data: [
       {

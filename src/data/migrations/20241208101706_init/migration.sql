@@ -1,20 +1,4 @@
 -- CreateTable
-CREATE TABLE `archeosites` (
-    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-    `naam` VARCHAR(255) NOT NULL,
-    `land` VARCHAR(255) NOT NULL,
-    `beschrijving` TEXT NULL,
-    `breedtegraad` DECIMAL(10, 8) NOT NULL,
-    `lengtegraad` DECIMAL(11, 8) NOT NULL,
-    `hoogte` DECIMAL(6, 2) NULL,
-    `foto` VARCHAR(255) NULL,
-
-    UNIQUE INDEX `idx_archeosite_naam_unique`(`naam`),
-    UNIQUE INDEX `idx_archeosite_foto_unique`(`foto`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
 CREATE TABLE `markers` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `siteId` INTEGER UNSIGNED NOT NULL,
@@ -34,11 +18,25 @@ CREATE TABLE `markers` (
 CREATE TABLE `wendes` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `siteId` INTEGER UNSIGNED NOT NULL,
-    `wendeType` ENUM('zomerZonnewende', 'winterZonnewende', 'noordGroteMaanwende', 'noordKleineMaanwende', 'zuidGroteMaanwende', 'zuidKleineMaanwende') NOT NULL,
-    `astronomischEvent` ENUM('ondergang', 'opgang') NOT NULL,
+    `wendeType` ENUM('ZomerZonnewende', 'WinterZonnewende', 'NoordGroteMaanwende', 'NoordKleineMaanwende', 'ZuidGroteMaanwende', 'ZuidKleineMaanwende') NOT NULL,
+    `astronomischEvent` ENUM('Ondergang', 'Opgang') NOT NULL,
     `datum` DATE NOT NULL,
-    `tijd` TIME NOT NULL,
+    `tijd` VARCHAR(255) NOT NULL,
     `azimuthoek` DECIMAL(6, 2) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `archeosites` (
+    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+    `naam` VARCHAR(255) NOT NULL,
+    `land` VARCHAR(255) NOT NULL,
+    `beschrijving` TEXT NULL,
+    `breedtegraad` DECIMAL(10, 8) NOT NULL,
+    `lengtegraad` DECIMAL(11, 8) NOT NULL,
+    `hoogte` DECIMAL(6, 2) NULL,
+    `foto` VARCHAR(255) NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

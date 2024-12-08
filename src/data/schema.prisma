@@ -13,7 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model OrientatieMarker{
   @@map("markers")         // Set the table name to "markers"
   id           Int         @id @default(autoincrement()) @db.UnsignedInt
