@@ -4,9 +4,15 @@ import * as archeositeService from '../service/archeosite';
 import type { Context} from 'koa';
 
 const getAllArcheosites = async (ctx: Context) =>{
+  const archeosites = await archeositeService.getAll();
   ctx.body = {
-    items: archeositeService.getAll(),
+    items: archeosites,
   };      
+};
+
+const getArcheositeById = async (ctx: Context)=>{
+  const archeosite = await archeositeService.getById(Number(ctx.params.id));
+  ctx.body = archeosite;
 };
 
 const createArcheosite = async (ctx: Context) =>{
@@ -25,17 +31,13 @@ const createArcheosite = async (ctx: Context) =>{
   ctx.body = newArcheosite;
 };
 
-const getArcheositeById = async (ctx: Context)=>{
-  ctx.body = archeositeService.getById(Number(ctx.params.id));
-};
-
 export default (parent: Router)=>{
   const router = new Router({
     prefix: '/archeosites',
   });
   router.get('/', getAllArcheosites );
-  router.post('/', createArcheosite );
   router.get('/:id', getArcheositeById );
+  router.post('/', createArcheosite );
 
   // de archeosites router hangen onder parent
   parent

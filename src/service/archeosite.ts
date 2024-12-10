@@ -1,13 +1,30 @@
 // src/service/archeosite.ts
 import ARCHEOLOGISCHESITE_DATA from '../data/mock_sites';
 import ORIENTATIEMARKERS_DATA from '../data/mock_markers';
+import { prisma } from '../data';
 
-export const getAll = () =>{
-  return ARCHEOLOGISCHESITE_DATA;
+export const getAll = async () =>{
+  return prisma.archeologischeSite.findMany();
 };
 
-export const getById = (id: number) => {
-  return ARCHEOLOGISCHESITE_DATA.find((s)=>s.id===id);
+export const getById = async (id: number) => {
+  return prisma.archeologischeSite.findUnique({
+    where: {
+      id,
+    },
+    include:{
+      orientatieMarkers: {
+        select: {
+          id: true,
+          naam: true,
+          beschrijving: true,
+          breedtegraad: true,
+          lengtegraad: true,
+          foto: true,
+        },
+      },
+    },
+  });
 };
 
 export const create = (

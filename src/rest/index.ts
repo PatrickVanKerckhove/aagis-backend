@@ -1,8 +1,8 @@
 // src/rest/index.ts
 import Router from '@koa/router';
 import type Application from 'koa';
-import installArcheositeRouter from './archeosite';
 import installHealthRouter from './health';
+import installArcheositeRouter from './archeosite';
 import installMarkerRouter from './marker';
 
 export default (app: Application)=>{
@@ -10,8 +10,8 @@ export default (app: Application)=>{
     prefix: '/api',
   });
 
-  installArcheositeRouter(router);
   installHealthRouter(router);
+  installArcheositeRouter(router);
   installMarkerRouter(router);
 
   app.use(router.routes())
