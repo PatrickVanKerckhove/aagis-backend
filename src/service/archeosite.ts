@@ -1,6 +1,7 @@
 // src/service/archeosite.ts
 import ARCHEOLOGISCHESITE_DATA from '../data/mock_sites';
 import ORIENTATIEMARKERS_DATA from '../data/mock_markers';
+import WENDE_DATA from '../data/mock_wendes';
 import { prisma } from '../data';
 
 export const getAll = async () =>{
@@ -16,11 +17,22 @@ export const getById = async (id: number) => {
       orientatieMarkers: {
         select: {
           id: true,
+          wendeId: true,
           naam: true,
           beschrijving: true,
           breedtegraad: true,
           lengtegraad: true,
           foto: true,
+        },
+      },
+      wendes: {
+        select: {
+          id: true,
+          wendeType: true,
+          astronomischEvent: true,
+          datum: true,
+          tijd: true,
+          azimuthoek: true,
         },
       },
     },
@@ -59,4 +71,8 @@ export const deleteById = (id: number) => {
 
 export const getMarkersBySiteId = (siteId: number) =>{
   return ORIENTATIEMARKERS_DATA.filter((m)=>m.siteId === siteId);
+};
+
+export const getWendesBySiteId = (siteId: number) =>{
+  return WENDE_DATA.filter((w)=>w.siteId === siteId);
 };

@@ -4,6 +4,7 @@ import type Application from 'koa';
 import installHealthRouter from './health';
 import installArcheositeRouter from './archeosite';
 import installMarkerRouter from './marker';
+import installWendeRouter from './wende';
 
 export default (app: Application)=>{
   const router = new Router({
@@ -13,6 +14,7 @@ export default (app: Application)=>{
   installHealthRouter(router);
   installArcheositeRouter(router);
   installMarkerRouter(router);
+  installWendeRouter(router);
 
   app.use(router.routes())
     .use(router.allowedMethods());
