@@ -2,7 +2,10 @@
 import { PrismaClient } from '@prisma/client';
 import { getLogger } from '../core/logging';
 
-export const prisma = new PrismaClient(); 
+// Singleton
+export const prisma = new PrismaClient({
+  log: ['query', 'info', 'warn', 'error'],
+}); 
 
 export async function initializeData(): Promise<void> {
   getLogger().info('Initializing connection to the database');

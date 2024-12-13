@@ -16,19 +16,19 @@ const getArcheositeById = async (ctx: Context)=>{
 };
 
 const createArcheosite = async (ctx: Context) =>{
-  const newArcheosite = archeositeService.create({
-    ...ctx.request.body,
-    siteId: Number(ctx.request.body.siteId),
-    naam: String(ctx.request.body.naam),
-    land: String(ctx.request.body.land),
-    beschrijving: String(ctx.request.body.beschrijving),
-    breedtegraad: Number(ctx.request.body.breedtegraad),
-    lengtegraad: Number(ctx.request.body.lengtegraad),
-    hoogte: Number(ctx.request.body.hoogte),
-    foto: String(ctx.request.body.foto),
-    geselecteerd: Boolean(ctx.request.body.geselecteerd),
-  });
+  const newArcheosite = await archeositeService.create(ctx.request.body!);
+  ctx.status = 201;  
   ctx.body = newArcheosite;
+};
+
+const updateArcheosite = async (ctx: Context)=>{
+  const archeologischeSite = await archeositeService.updateById(Number(ctx.params.id), ctx.request.body!);
+  ctx.body = archeologischeSite;
+};
+
+const deleteArcheosite = async (ctx: Context)=>{
+  await archeositeService.deleteById(Number(ctx.params.id));
+  ctx.status = 204;
 };
 
 export default (parent: Router)=>{
@@ -38,6 +38,8 @@ export default (parent: Router)=>{
   router.get('/', getAllArcheosites );
   router.get('/:id', getArcheositeById );
   router.post('/', createArcheosite );
+  router.put('/:id', updateArcheosite);
+  router.delete('/:id', deleteArcheosite);
 
   // de archeosites router hangen onder parent
   parent

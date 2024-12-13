@@ -1,5 +1,4 @@
 // src/service/archeosite.ts
-import ARCHEOLOGISCHESITE_DATA from '../data/mock_sites';
 import ORIENTATIEMARKERS_DATA from '../data/mock_markers';
 import WENDE_DATA from '../data/mock_wendes';
 import { prisma } from '../data';
@@ -9,7 +8,7 @@ export const getAll = async () =>{
 };
 
 export const getById = async (id: number) => {
-  return prisma.archeologischeSite.findUnique({
+  const archeosite = await prisma.archeologischeSite.findUnique({
     where: {
       id,
     },
@@ -37,36 +36,55 @@ export const getById = async (id: number) => {
       },
     },
   });
+  if (!archeosite){
+    throw new Error('Er is geen archeologische site met dit id.');
+  }
+  return archeosite;
 };
 
-export const create = (
-  {naam, land, beschrijving, breedtegraad, lengtegraad, hoogte, foto, geselecteerd}:any,
+export const create = async (
+  {naam, land, beschrijving, breedtegraad, lengtegraad, hoogte, foto}:any,
 ) =>{
-  const maxId = Math.max(...ARCHEOLOGISCHESITE_DATA.map((i) => i.id));
-  const newArcheosite = {
-    id: maxId + 1,
-    naam,
-    land,
-    beschrijving,
-    breedtegraad,
-    lengtegraad,
-    hoogte,
-    foto,
-    geselecteerd,
-  };
-  ARCHEOLOGISCHESITE_DATA.push(newArcheosite);
-  return newArcheosite;
+  return prisma.archeologischeSite.create({
+    data: {
+      naam,
+      land,
+      beschrijving,
+      breedtegraad,
+      lengtegraad,
+      hoogte,
+      foto,
+    },
+  });
+
 };
 
-export const updateById = (
+export const updateById = async (
   id: number, 
-  {siteId, naam, land, beschrijving, breedtegraad, lengtegraad, hoogte, foto}:any,
+  {naam, land, beschrijving, breedtegraad, lengtegraad, hoogte, foto}:any,
 ) => {
-  throw new Error('Not implemented yet');
+  return prisma.archeologischeSite.update({
+    where: {
+      id,
+    },
+    data: {
+      naam,
+      land,
+      beschrijving,
+      breedtegraad,
+      lengtegraad,
+      hoogte,
+      foto,
+    },
+  });
 };
 
-export const deleteById = (id: number) => {
-  throw new Error('Not implemented yet');
+export const deleteById = async (id: number) => {
+  await prisma.archeologischeSite.delete({
+    where: {
+      id,
+    },
+  });
 };
 
 export const getMarkersBySiteId = (siteId: number) =>{
