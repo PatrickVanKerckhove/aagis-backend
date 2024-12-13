@@ -200,7 +200,7 @@ async function main() {
       { // Newgrange
         id: 2,
         siteId: 2,
-        wendeId: 9,
+        wendeId: 3,
         naam: 'Roof-box',
         beschrijving: 'Venster boven de ingang van het complex, in lijn met de zonsopgang tijdens de winterzonnewende.',
         breedtegraad: 53.694498,

@@ -56,7 +56,6 @@ export const create = async (
       foto,
     },
   });
-
 };
 
 export const updateById = async (
