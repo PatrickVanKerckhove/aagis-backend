@@ -1,6 +1,4 @@
 // src/service/archeosite.ts
-import ORIENTATIEMARKERS_DATA from '../data/mock_markers';
-import WENDE_DATA from '../data/mock_wendes';
 import { prisma } from '../data';
 
 export const getAll = async () =>{
@@ -87,9 +85,17 @@ export const deleteById = async (id: number) => {
 };
 
 export const getMarkersBySiteId = (siteId: number) =>{
-  return ORIENTATIEMARKERS_DATA.filter((m)=>m.siteId === siteId);
+  return prisma.orientatieMarker.findMany({
+    where: {
+      siteId: siteId,
+    },
+  });
 };
 
 export const getWendesBySiteId = (siteId: number) =>{
-  return WENDE_DATA.filter((w)=>w.siteId === siteId);
+  return prisma.wende.findMany({
+    where: {
+      siteId: siteId,
+    },
+  });
 };

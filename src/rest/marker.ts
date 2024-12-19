@@ -33,7 +33,7 @@ const deleteMarker = async (ctx: Context)=>{
 };
 
 const getMarkersBySiteId = async (ctx: Context)=>{
-  const archeosites = archeositeService.getMarkersBySiteId(
+  const archeosites = await archeositeService.getMarkersBySiteId(
     Number(ctx.params.id),
   );
   ctx.body = {

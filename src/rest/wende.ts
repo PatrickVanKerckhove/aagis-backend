@@ -33,7 +33,7 @@ const deleteWende = async (ctx: Context)=>{
 };
 
 const getWendesBySiteId = async (ctx: Context)=>{
-  const archeosites = archeositeService.getWendesBySiteId(
+  const archeosites = await archeositeService.getWendesBySiteId(
     Number(ctx.params.id),
   );
   ctx.body = {
