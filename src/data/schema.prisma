@@ -1,18 +1,11 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// src/data/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
-
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
-
 model OrientatieMarker{
   @@map("markers")         // Set the table name to "markers"
   id           Int         @id @default(autoincrement()) @db.UnsignedInt
@@ -38,7 +31,6 @@ model Wende {
   azimuthoek        Decimal            @db.Decimal(6, 2)
   orientatieMarkers OrientatieMarker[] @relation("WendeToMarkers")
 }
-
 model ArcheologischeSite{
   @@map("archeosites")     // Set the table name to "archeosites"
   id           Int         @id @default(autoincrement()) @db.UnsignedInt
@@ -52,7 +44,6 @@ model ArcheologischeSite{
   orientatieMarkers  OrientatieMarker[]  @relation("SiteToMarkers")
   wendes             Wende[]             @relation("SiteToWendes")
 }
-
 enum WendeType {
   ZomerZonnewende
   WinterZonnewende
