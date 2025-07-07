@@ -17,7 +17,6 @@ model OrientatieMarker{
   beschrijving String?     @db.Text
   breedtegraad Decimal     @db.Decimal(10, 8) //10 cijfers in totaal, 8 na komma
   lengtegraad  Decimal     @db.Decimal(11, 8)
-  foto         String?     @unique(map: "idx_marker_foto_unique") @db.VarChar(255)
 }
 model Wende {
   @@map("wendes")         // Set the table name to "wendes"
@@ -26,8 +25,7 @@ model Wende {
   site              ArcheologischeSite @relation("SiteToWendes", fields: [siteId], references: [id], onDelete: Cascade, map: "fk_wende_site")
   wendeType         WendeType
   astronomischEvent AstronomischEvent
-  datum             DateTime           @db.Date
-  tijd              String             @db.VarChar(255)
+  datumTijd         DateTime           @db.DateTime(0)
   azimuthoek        Decimal            @db.Decimal(6, 2)
   orientatieMarkers OrientatieMarker[] @relation("WendeToMarkers")
 }
@@ -45,14 +43,14 @@ model ArcheologischeSite{
   wendes             Wende[]             @relation("SiteToWendes")
 }
 enum WendeType {
-  ZomerZonnewende
-  WinterZonnewende
-  NoordGroteMaanwende
-  NoordKleineMaanwende
-  ZuidGroteMaanwende
-  ZuidKleineMaanwende
+  ZOMERZONNEWENDE
+  WINTERZONNEWENDE
+  NOORDGROTEMAANWENDE
+  NOORDKLEINEMAANWENDE
+  ZUIDGROTEMAANWENDE
+  ZUIDKLEINEMAANWENDE
 }
 enum AstronomischEvent {
-  Ondergang
-  Opgang
+  ONDERGANG
+  OPGANG
 }

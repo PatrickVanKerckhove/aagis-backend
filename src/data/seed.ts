@@ -1,11 +1,10 @@
 // src/data/seed.ts
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, WendeType, AstronomischEvent} from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function main() {
   // Seed archeologischeSites
-  // ==========
   await prisma.archeologischeSite.createMany({
     data: [
       {
@@ -42,149 +41,132 @@ async function main() {
   });
 
   // Seed wendes
-  // =================
   await prisma.wende.createMany({
     data: [
       {
         id: 1,
         siteId: 1, //Stonehenge
-        wendeType: 'ZomerZonnewende',
-        astronomischEvent: 'Opgang',
-        datum: new Date('2023-06-21'),
-        tijd: '04:52:00',
+        wendeType: WendeType.ZOMERZONNEWENDE,
+        astronomischEvent: AstronomischEvent.OPGANG,
+        datumTijd: new Date(2023, 5, 21, 4, 52), // maand 5 = juni
         azimuthoek: 51.3,
       },
       {
         id: 2,
         siteId: 1, //Stonehenge
-        wendeType: 'WinterZonnewende',
-        astronomischEvent: 'Opgang',
-        datum: new Date('2023-12-22'),
-        tijd: '08:09:00',
+        wendeType: WendeType.WINTERZONNEWENDE,
+        astronomischEvent: AstronomischEvent.OPGANG,
+        datumTijd: new Date(2023, 11, 22, 8, 9),
         azimuthoek: 128.05,
       },
       {
         id: 3,
         siteId: 2, //Newgrange
-        wendeType: 'WinterZonnewende',
-        astronomischEvent: 'Opgang',
-        datum: new Date('2023-12-21'),
-        tijd: '08:58:00',
+        wendeType: WendeType.WINTERZONNEWENDE,
+        astronomischEvent: AstronomischEvent.OPGANG,
+        datumTijd: new Date(2023, 11, 21, 8, 58),
         azimuthoek: 134.0,
       },
       {
         id: 4,
         siteId: 3, //Lokeren
-        wendeType: 'ZomerZonnewende',
-        astronomischEvent: 'Opgang',
-        datum: new Date('2023-06-21'),
-        tijd: '05:28:00',
+        wendeType: WendeType.ZOMERZONNEWENDE,
+        astronomischEvent: AstronomischEvent.OPGANG,
+        datumTijd: new Date(2023, 5, 21, 5, 28),
         azimuthoek: 49.34,
       },
       {
         id: 5,
         siteId: 3, //Lokeren
-        wendeType: 'WinterZonnewende',
-        astronomischEvent: 'Opgang',
-        datum: new Date('2023-12-22'),
-        tijd: '08:45:00',
+        wendeType: WendeType.WINTERZONNEWENDE,
+        astronomischEvent: AstronomischEvent.OPGANG,
+        datumTijd: new Date(2023, 11, 22, 8, 45),
         azimuthoek: 127.97,
       },
       {
         id: 6,
         siteId: 3, //Lokeren
-        wendeType: 'ZomerZonnewende',
-        astronomischEvent: 'Ondergang',
-        datum: new Date('2023-06-21'),
-        tijd: '23:02:00',
+        wendeType: WendeType.ZOMERZONNEWENDE,
+        astronomischEvent: AstronomischEvent.ONDERGANG,
+        datumTijd: new Date(2023, 5, 21, 23, 2),
         azimuthoek: 310.67,
       },
       {
         id: 7,
         siteId: 3, //Lokeren
-        wendeType: 'WinterZonnewende',
-        astronomischEvent: 'Ondergang',
-        datum: new Date('2023-12-22'),
-        tijd: '16:39:00',
+        wendeType: WendeType.WINTERZONNEWENDE,
+        astronomischEvent: AstronomischEvent.ONDERGANG,
+        datumTijd: new Date(2023, 11, 22, 16, 39),
         azimuthoek: 232.03,
       },
       {
         id: 8,
         siteId: 3, //Lokeren
-        wendeType: 'ZuidKleineMaanwende',
-        astronomischEvent: 'Opgang',
-        datum: new Date('2015-10-18'),
-        tijd: '13:17:00',
+        wendeType: WendeType.ZUIDKLEINEMAANWENDE,
+        astronomischEvent: AstronomischEvent.OPGANG,
+        datumTijd: new Date(2015, 9, 18, 13, 17),
         azimuthoek: 119.88,
       },
       {
         id: 9,
         siteId: 3, //Lokeren
-        wendeType: 'ZuidKleineMaanwende',
-        astronomischEvent: 'Ondergang',
-        datum: new Date('2015-10-18'),
-        tijd: '22:22:00',
+        wendeType: WendeType.ZUIDKLEINEMAANWENDE,
+        astronomischEvent: AstronomischEvent.ONDERGANG,
+        datumTijd: new Date(2015, 9, 18, 22, 22),
         azimuthoek: 240.06,
       },
       {
         id: 10,
         siteId: 3, //Lokeren
-        wendeType: 'NoordKleineMaanwende',
-        astronomischEvent: 'Opgang',
-        datum: new Date('2015-10-31'),
-        tijd: '20:55:00',
+        wendeType: WendeType.NOORDKLEINEMAANWENDE,
+        astronomischEvent: AstronomischEvent.OPGANG,
+        datumTijd: new Date(2015, 9, 31, 20, 55),
         azimuthoek: 60.48,
       },
       {
         id: 11,
         siteId: 3, //Lokeren
-        wendeType: 'NoordKleineMaanwende',
-        astronomischEvent: 'Ondergang',
-        datum: new Date('2015-10-31'),
-        tijd: '11:45:00',
+        wendeType: WendeType.NOORDKLEINEMAANWENDE,
+        astronomischEvent: AstronomischEvent.ONDERGANG,
+        datumTijd: new Date(2015, 9, 31, 11, 45),
         azimuthoek: 299.71,
       }, 
       {
         id: 12,
         siteId: 3, //Lokeren
-        wendeType: 'NoordGroteMaanwende',
-        astronomischEvent: 'Opgang',
-        datum: new Date('2006-06-25'),
-        tijd: '04:28:00',
+        wendeType: WendeType.NOORDGROTEMAANWENDE,
+        astronomischEvent: AstronomischEvent.OPGANG,
+        datumTijd: new Date(2006, 5, 25, 4, 28),
         azimuthoek: 40.99,
       },
       {
         id: 13,
         siteId: 3, //Lokeren
-        wendeType: 'NoordGroteMaanwende',
-        astronomischEvent: 'Ondergang',
-        datum: new Date('2006-06-25'),
-        tijd: '22:43:00',
+        wendeType: WendeType.NOORDGROTEMAANWENDE,
+        astronomischEvent: AstronomischEvent.ONDERGANG,
+        datumTijd: new Date(2006, 5, 25, 22, 43),
         azimuthoek: 318.69,
       },
       {
         id: 14,
         siteId: 3, //Lokeren
-        wendeType: 'ZuidGroteMaanwende',
-        astronomischEvent: 'Opgang',
-        datum: new Date('2006-07-09'),
-        tijd: '21:23:00',
+        wendeType: WendeType.ZUIDGROTEMAANWENDE,
+        astronomischEvent: AstronomischEvent.OPGANG,
+        datumTijd: new Date(2006, 6, 9, 21, 23),
         azimuthoek: 139.64,
       },
       {
         id: 15,
         siteId: 3, //Lokeren
-        wendeType: 'ZuidGroteMaanwende',
-        astronomischEvent: 'Ondergang',
-        datum: new Date('2006-07-09'),
-        tijd: '03:02:00',
+        wendeType: WendeType.ZUIDGROTEMAANWENDE,
+        astronomischEvent: AstronomischEvent.ONDERGANG,
+        datumTijd: new Date(2006, 6, 9, 3, 2),
         azimuthoek: 221.42,
       },
     ],
   });
 
   // Seed orientatieMarkers
-  // ===========
   await prisma.orientatieMarker.createMany({
     data: [
       { //Stonehenge
@@ -195,7 +177,6 @@ async function main() {
         beschrijving: 'Megaliet in lijn met de zonsopgang tijdens de zomerzonnewende.',
         breedtegraad: 51.179085,
         lengtegraad: -1.825797,
-        foto: '/images/Stonehenge_HeelStone_800x600.jpg',
       },
       { // Newgrange
         id: 2,
@@ -205,7 +186,6 @@ async function main() {
         beschrijving: 'Venster boven de ingang van het complex, in lijn met de zonsopgang tijdens de winterzonnewende.',
         breedtegraad: 53.694498,
         lengtegraad: -6.475209,
-        foto: '/images/Newgrange_Roof-box_800x600.jpg',
       },
     ],
   });

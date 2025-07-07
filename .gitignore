@@ -39,6 +39,7 @@ bower_components
 build/Release
 
 # Negeer alles in de map build/
+aagis-backend/build/
 build/
 
 # Dependency directories
