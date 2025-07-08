@@ -18,7 +18,6 @@ export const getById = async (id: number) => {
           beschrijving: true,
           breedtegraad: true,
           lengtegraad: true,
-          foto: true,
         },
       },
     },
@@ -30,15 +29,14 @@ export const getById = async (id: number) => {
 };
 
 export const create = async (
-  {siteId, wendeType, astronomischEvent, datum, tijd, azimuthoek}:any,
+  {siteId, wendeType, astronomischEvent, datumTijd, azimuthoek}:any,
 ) =>{
   return prisma.wende.create({
     data: {
       siteId, 
       wendeType, 
       astronomischEvent, 
-      datum, 
-      tijd, 
+      datumTijd, 
       azimuthoek,
     },
   });
@@ -46,7 +44,7 @@ export const create = async (
 
 export const updateById = async (
   id: number, 
-  {siteId, wendeType, astronomischEvent, datum, tijd, azimuthoek}:any,
+  {siteId, wendeType, astronomischEvent, datumTijd, azimuthoek}:any,
 ) => {
   return prisma.wende.update({
     where: {
@@ -56,8 +54,7 @@ export const updateById = async (
       siteId, 
       wendeType, 
       astronomischEvent, 
-      datum, 
-      tijd, 
+      datumTijd, 
       azimuthoek,
     },
   });

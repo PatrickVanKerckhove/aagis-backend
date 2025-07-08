@@ -12,5 +12,4 @@ export interface OrientatieMarker extends Entity{
   beschrijving?: string | null;
   breedtegraad: number; // matches Decimal(10, 8)
   lengtegraad: number;  // matches Decimal(11, 8)
-  foto?: string | null;
 }

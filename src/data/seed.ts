@@ -190,6 +190,19 @@ async function main() {
     ],
   });
 
+  // Seed users
+  await prisma.user.createMany({
+    data: [
+      { 
+        id: 1,
+        naam: 'user',
+      },
+      {
+        id: 2,
+        naam: 'admin',
+      },
+    ],
+  }); 
 }
 
 main()

@@ -19,7 +19,6 @@ export const getById = async (id: number) => {
           beschrijving: true,
           breedtegraad: true,
           lengtegraad: true,
-          foto: true,
         },
       },
       wendes: {
@@ -27,8 +26,7 @@ export const getById = async (id: number) => {
           id: true,
           wendeType: true,
           astronomischEvent: true,
-          datum: true,
-          tijd: true,
+          datumTijd: true,
           azimuthoek: true,
         },
       },

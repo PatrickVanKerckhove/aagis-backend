@@ -17,8 +17,7 @@ export const getById = async (id: number) => {
           siteId: true,
           wendeType: true,
           astronomischEvent: true,
-          datum: true,
-          tijd: true,
+          datumTijd: true,
           azimuthoek: true,
         },
       },
@@ -31,7 +30,7 @@ export const getById = async (id: number) => {
 };
 
 export const create = async (
-  {siteId, wendeId, naam, beschrijving, breedtegraad, lengtegraad, foto}:any,
+  {siteId, wendeId, naam, beschrijving, breedtegraad, lengtegraad}:any,
 ) =>{
   return prisma.orientatieMarker.create({
     data: {
@@ -41,14 +40,13 @@ export const create = async (
       beschrijving,
       breedtegraad, 
       lengtegraad, 
-      foto,
     },
   });
 };
 
 export const updateById = async (
   id: number, 
-  {siteId, wendeId, naam, beschrijving, breedtegraad, lengtegraad, foto}:any,
+  {siteId, wendeId, naam, beschrijving, breedtegraad, lengtegraad}:any,
 ) => {
   return prisma.orientatieMarker.update({
     where: {
@@ -61,7 +59,6 @@ export const updateById = async (
       beschrijving, 
       breedtegraad, 
       lengtegraad, 
-      foto,
     },
   });
 };

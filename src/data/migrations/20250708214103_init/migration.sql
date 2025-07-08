@@ -38,6 +38,14 @@ CREATE TABLE `archeosites` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `users` (
+    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+    `naam` VARCHAR(255) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `markers` ADD CONSTRAINT `fk_marker_site` FOREIGN KEY (`siteId`) REFERENCES `archeosites`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
