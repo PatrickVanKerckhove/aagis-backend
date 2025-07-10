@@ -1,16 +1,22 @@
 // src/types/wende.ts
 import type { Entity } from './common';
-import type { ArcheologischeSite } from './archeosite';
-import type { OrientatieMarker } from './marker';
+import type { Decimal } from '@prisma/client/runtime/library';
 import type { AstronomischEvent, WendeType } from '@prisma/client';
 
 export interface Wende extends Entity{
   siteId: number;
-  site?: ArcheologischeSite;
   wendeType: WendeType;
   astronomischEvent: AstronomischEvent;
-  datum: Date;
-  tijd: string;
-  azimuthoek: number; // matches Decimal(6, 2)
-  orientatieMarkers?: OrientatieMarker[];
+  datumTijd: Date;
+  azimuthoek: Decimal;
 }
+
+export interface WendeCreateInput{
+  siteId: number;
+  wendeType: WendeType;
+  astronomischEvent: AstronomischEvent;
+  datumTijd: Date;
+  azimuthoek: Decimal;
+}
+
+export interface WendeUpdateInput extends WendeCreateInput{}

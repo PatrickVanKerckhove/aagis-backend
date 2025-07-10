@@ -41,7 +41,7 @@ export default (parent: Router)=>{
   router.put('/:id', updateUser);
   router.delete('/:id', deleteUser);
 
-  // de archeosites router hangen onder parent
+  // de users router hangen onder parent
   parent
     .use(router.routes()) // effectieve routing
     .use(router.allowedMethods()); // HTTP 405

@@ -1,11 +1,12 @@
 // src/service/wende.ts
 import {prisma} from '../data';
+import type { Wende, WendeCreateInput, WendeUpdateInput } from '../types/wende';
 
-export const getAll = async () =>{
+export const getAll = async ():Promise<Wende[]> =>{
   return prisma.wende.findMany();
 };
 
-export const getById = async (id: number) => {
+export const getById = async (id: number):Promise<Wende> => {
   const wende = await prisma.wende.findUnique({
     where: {
       id,
@@ -29,8 +30,8 @@ export const getById = async (id: number) => {
 };
 
 export const create = async (
-  {siteId, wendeType, astronomischEvent, datumTijd, azimuthoek}:any,
-) =>{
+  {siteId, wendeType, astronomischEvent, datumTijd, azimuthoek} : WendeCreateInput) 
+: Promise<Wende> =>{
   return prisma.wende.create({
     data: {
       siteId, 
@@ -44,8 +45,8 @@ export const create = async (
 
 export const updateById = async (
   id: number, 
-  {siteId, wendeType, astronomischEvent, datumTijd, azimuthoek}:any,
-) => {
+  {siteId, wendeType, astronomischEvent, datumTijd, azimuthoek}:WendeUpdateInput) 
+: Promise<Wende> => {
   return prisma.wende.update({
     where: {
       id,
@@ -60,7 +61,7 @@ export const updateById = async (
   });
 };
 
-export const deleteById = async (id: number) => {
+export const deleteById = async (id: number) : Promise<void> => {
   await prisma.wende.delete({
     where: {
       id,

@@ -1,11 +1,12 @@
 // src/service/marker.ts
 import {prisma} from '../data';
+import type { MarkerCreateInput, MarkerUpdateInput, OrientatieMarker } from '../types/marker';
 
-export const getAll = async () =>{
+export const getAll = async ():Promise<OrientatieMarker[]> =>{
   return prisma.orientatieMarker.findMany();
 };
 
-export const getById = async (id: number) => {
+export const getById = async (id: number):Promise<OrientatieMarker> => {
   const marker = await prisma.orientatieMarker.findUnique({
     where: {
       id,
@@ -30,8 +31,8 @@ export const getById = async (id: number) => {
 };
 
 export const create = async (
-  {siteId, wendeId, naam, beschrijving, breedtegraad, lengtegraad}:any,
-) =>{
+  {siteId, wendeId, naam, beschrijving, breedtegraad, lengtegraad} : MarkerCreateInput) 
+: Promise<OrientatieMarker> =>{
   return prisma.orientatieMarker.create({
     data: {
       siteId, 
@@ -45,9 +46,8 @@ export const create = async (
 };
 
 export const updateById = async (
-  id: number, 
-  {siteId, wendeId, naam, beschrijving, breedtegraad, lengtegraad}:any,
-) => {
+  id: number, {siteId, wendeId, naam, beschrijving, breedtegraad, lengtegraad}: MarkerUpdateInput)
+: Promise<OrientatieMarker> => {
   return prisma.orientatieMarker.update({
     where: {
       id,
@@ -63,7 +63,7 @@ export const updateById = async (
   });
 };
 
-export const deleteById = async (id: number) => {
+export const deleteById = async (id: number) : Promise<void> => {
   await prisma.orientatieMarker.delete({
     where: {
       id,

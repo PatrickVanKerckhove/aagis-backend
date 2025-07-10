@@ -1,11 +1,12 @@
 // src/service/user.ts
 import { prisma } from '../data';
+import type { User, UserCreateInput, UserUpdateInput } from '../types/user';
 
-export const getAll = async () => {
+export const getAll = async () : Promise<User[]> => {
   return prisma.user.findMany(); 
 };
 
-export const getById = async (id: number) => {
+export const getById = async (id: number) : Promise<User> => {
   const user = await prisma.user.findUnique({
     where:{
       id,
@@ -17,9 +18,7 @@ export const getById = async (id: number) => {
   return user;
 };
 
-export const create = async (
-  {naam}:any,
-) =>{
+export const create = async ({naam}:UserCreateInput) : Promise<User> =>{
   return prisma.user.create({
     data: {
       naam,
@@ -27,10 +26,7 @@ export const create = async (
   });
 };
 
-export const updateById = async (
-  id:number, 
-  {naam}:any,
-) => {
+export const updateById = async (id:number, {naam}:UserUpdateInput): Promise<User> => {
   return prisma.user.update({
     where: {
       id,
@@ -41,7 +37,7 @@ export const updateById = async (
   });
 };
 
-export const deleteById = async (id: number) => {
+export const deleteById = async (id: number) : Promise<void> => {
   await prisma.user.delete({
     where: {
       id,

@@ -5,6 +5,7 @@ import installHealthRouter from './health';
 import installArcheositeRouter from './archeosite';
 import installMarkerRouter from './marker';
 import installWendeRouter from './wende';
+import installUserRouter from './user';
 
 export default (app: Application)=>{
   const router = new Router({
@@ -15,6 +16,7 @@ export default (app: Application)=>{
   installArcheositeRouter(router);
   installMarkerRouter(router);
   installWendeRouter(router);
+  installUserRouter(router);
 
   app.use(router.routes())
     .use(router.allowedMethods());

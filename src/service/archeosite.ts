@@ -1,11 +1,12 @@
 // src/service/archeosite.ts
 import { prisma } from '../data';
+import type { ArcheologischeSite, ArcheoSiteCreateInput, ArcheoSiteUpdateInput } from '../types/archeosite';
 
-export const getAll = async () =>{
+export const getAll = async () : Promise<ArcheologischeSite[]> =>{
   return prisma.archeologischeSite.findMany();
 };
 
-export const getById = async (id: number) => {
+export const getById = async (id: number) : Promise<ArcheologischeSite> => {
   const archeosite = await prisma.archeologischeSite.findUnique({
     where: {
       id,
@@ -39,8 +40,8 @@ export const getById = async (id: number) => {
 };
 
 export const create = async (
-  {naam, land, beschrijving, breedtegraad, lengtegraad, hoogte, foto}:any,
-) =>{
+  {naam, land, beschrijving, breedtegraad, lengtegraad, hoogte, foto} : ArcheoSiteCreateInput) 
+: Promise<ArcheologischeSite> =>{
   return prisma.archeologischeSite.create({
     data: {
       naam,
@@ -55,9 +56,8 @@ export const create = async (
 };
 
 export const updateById = async (
-  id: number, 
-  {naam, land, beschrijving, breedtegraad, lengtegraad, hoogte, foto}:any,
-) => {
+  id: number, {naam, land, beschrijving, breedtegraad, lengtegraad, hoogte, foto} : ArcheoSiteUpdateInput) 
+: Promise<ArcheologischeSite> => {
   return prisma.archeologischeSite.update({
     where: {
       id,
@@ -74,26 +74,10 @@ export const updateById = async (
   });
 };
 
-export const deleteById = async (id: number) => {
+export const deleteById = async (id: number) : Promise<void> => {
   await prisma.archeologischeSite.delete({
     where: {
       id,
-    },
-  });
-};
-
-export const getMarkersBySiteId = (siteId: number) =>{
-  return prisma.orientatieMarker.findMany({
-    where: {
-      siteId: siteId,
-    },
-  });
-};
-
-export const getWendesBySiteId = (siteId: number) =>{
-  return prisma.wende.findMany({
-    where: {
-      siteId: siteId,
     },
   });
 };
