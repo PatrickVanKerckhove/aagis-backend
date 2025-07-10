@@ -6,12 +6,13 @@ import installRest from './rest';
 import config from 'config';
 import koaCors from '@koa/cors';
 import { initializeData } from './data';
+import type { AagisAppContext, AagisAppState } from './types/koa';
 
 const CORS_ORIGINS = config.get<string[]>('cors.origins');
 const CORS_MAX_AGE = config.get<number>('cors.maxAge');
 
-async function main(){
-  const app = new Koa();
+async function main(): Promise<void> {
+  const app = new Koa<AagisAppState, AagisAppContext>();
 
   app.use(
     koaCors({

@@ -1,14 +1,18 @@
 // src/rest/index.ts
 import Router from '@koa/router';
-import type Application from 'koa';
 import installHealthRouter from './health';
 import installArcheositeRouter from './archeosite';
 import installMarkerRouter from './marker';
 import installWendeRouter from './wende';
 import installUserRouter from './user';
+import type {
+  AagisAppContext,
+  AagisAppState,
+  KoaApplication,
+} from '../types/koa';
 
-export default (app: Application)=>{
-  const router = new Router({
+export default (app: KoaApplication)=>{
+  const router = new Router<AagisAppState, AagisAppContext>({
     prefix: '/api',
   });
 
