@@ -30,34 +30,22 @@ export const getById = async (id: number):Promise<Wende> => {
 };
 
 export const create = async (
-  {siteId, wendeType, astronomischEvent, datumTijd, azimuthoek} : WendeCreateInput) 
+  wende : WendeCreateInput) 
 : Promise<Wende> =>{
   return prisma.wende.create({
-    data: {
-      siteId, 
-      wendeType, 
-      astronomischEvent, 
-      datumTijd, 
-      azimuthoek,
-    },
+    data: wende,
   });
 };
 
 export const updateById = async (
   id: number, 
-  {siteId, wendeType, astronomischEvent, datumTijd, azimuthoek}:WendeUpdateInput) 
+  changes:WendeUpdateInput) 
 : Promise<Wende> => {
   return prisma.wende.update({
     where: {
       id,
     },
-    data: {
-      siteId, 
-      wendeType, 
-      astronomischEvent, 
-      datumTijd, 
-      azimuthoek,
-    },
+    data: changes,
   });
 };
 

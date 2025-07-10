@@ -40,37 +40,22 @@ export const getById = async (id: number) : Promise<ArcheologischeSite> => {
 };
 
 export const create = async (
-  {naam, land, beschrijving, breedtegraad, lengtegraad, hoogte, foto} : ArcheoSiteCreateInput) 
+  archeoSite : ArcheoSiteCreateInput) 
 : Promise<ArcheologischeSite> =>{
   return prisma.archeologischeSite.create({
-    data: {
-      naam,
-      land,
-      beschrijving,
-      breedtegraad,
-      lengtegraad,
-      hoogte,
-      foto,
-    },
+    data: archeoSite,
   });
 };
 
 export const updateById = async (
-  id: number, {naam, land, beschrijving, breedtegraad, lengtegraad, hoogte, foto} : ArcheoSiteUpdateInput) 
+  id: number, 
+  changes : ArcheoSiteUpdateInput) 
 : Promise<ArcheologischeSite> => {
   return prisma.archeologischeSite.update({
     where: {
       id,
     },
-    data: {
-      naam,
-      land,
-      beschrijving,
-      breedtegraad,
-      lengtegraad,
-      hoogte,
-      foto,
-    },
+    data: changes,
   });
 };
 
@@ -78,6 +63,22 @@ export const deleteById = async (id: number) : Promise<void> => {
   await prisma.archeologischeSite.delete({
     where: {
       id,
+    },
+  });
+};
+
+export const getMarkersBySiteId = (siteId: number) =>{
+  return prisma.orientatieMarker.findMany({
+    where: {
+      siteId: siteId,
+    },
+  });
+};
+
+export const getWendesBySiteId = (siteId: number) =>{
+  return prisma.wende.findMany({
+    where: {
+      siteId: siteId,
     },
   });
 };

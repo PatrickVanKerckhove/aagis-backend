@@ -1,5 +1,5 @@
 // src/types/marker.ts
-import type { Entity } from './common';
+import type { Entity, ListResponse } from './common';
 import type { Decimal } from '@prisma/client/runtime/library';
 export interface OrientatieMarker extends Entity{
   siteId: number;
@@ -20,3 +20,11 @@ export interface MarkerCreateInput{
 }
 
 export interface MarkerUpdateInput extends MarkerCreateInput{}
+
+export interface CreateMarkerRequest extends MarkerCreateInput{}
+export interface UpdateMarkerRequest extends MarkerCreateInput{}
+
+export interface GetAllMarkersResponse extends ListResponse<OrientatieMarker>{}
+export interface GetMarkerByIdResponse extends OrientatieMarker {}
+export interface CreateMarkerResponse extends GetMarkerByIdResponse{}
+export interface UpdateMarkerResponse extends GetMarkerByIdResponse{}

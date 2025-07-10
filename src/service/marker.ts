@@ -31,35 +31,22 @@ export const getById = async (id: number):Promise<OrientatieMarker> => {
 };
 
 export const create = async (
-  {siteId, wendeId, naam, beschrijving, breedtegraad, lengtegraad} : MarkerCreateInput) 
+  marker : MarkerCreateInput) 
 : Promise<OrientatieMarker> =>{
   return prisma.orientatieMarker.create({
-    data: {
-      siteId, 
-      wendeId, 
-      naam, 
-      beschrijving,
-      breedtegraad, 
-      lengtegraad, 
-    },
+    data: marker,
   });
 };
 
 export const updateById = async (
-  id: number, {siteId, wendeId, naam, beschrijving, breedtegraad, lengtegraad}: MarkerUpdateInput)
+  id: number, 
+  changes: MarkerUpdateInput)
 : Promise<OrientatieMarker> => {
   return prisma.orientatieMarker.update({
     where: {
       id,
     },
-    data: {
-      siteId, 
-      wendeId, 
-      naam, 
-      beschrijving, 
-      breedtegraad, 
-      lengtegraad, 
-    },
+    data: changes,
   });
 };
 

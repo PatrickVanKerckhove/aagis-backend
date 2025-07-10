@@ -1,6 +1,6 @@
 // src/types/archeosite.ts
 import type { Decimal } from '@prisma/client/runtime/library';
-import type { Entity } from './common';
+import type { Entity, ListResponse } from './common';
 
 export interface ArcheologischeSite extends Entity{
   naam: string;
@@ -22,3 +22,11 @@ export interface ArcheoSiteCreateInput{
 }
 
 export interface ArcheoSiteUpdateInput extends ArcheoSiteCreateInput{}
+
+export interface CreateArcheoSiteRequest extends ArcheoSiteCreateInput{}
+export interface UpdateArcheoSiteRequest extends ArcheoSiteCreateInput{}
+
+export interface GetAllArcheoSitesResponse extends ListResponse<ArcheologischeSite>{}
+export interface GetArcheoSiteByIdResponse extends ArcheologischeSite {}
+export interface CreateArcheoSiteResponse extends GetArcheoSiteByIdResponse{}
+export interface UpdateArcheoSiteResponse extends GetArcheoSiteByIdResponse{}

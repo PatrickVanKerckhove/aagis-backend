@@ -18,22 +18,21 @@ export const getById = async (id: number) : Promise<User> => {
   return user;
 };
 
-export const create = async ({naam}:UserCreateInput) : Promise<User> =>{
+export const create = async (user: UserCreateInput) : Promise<User> =>{
   return prisma.user.create({
-    data: {
-      naam,
-    },
+    data: user,
   });
 };
 
-export const updateById = async (id:number, {naam}:UserUpdateInput): Promise<User> => {
+export const updateById = async (
+  id:number, 
+  changes:UserUpdateInput,
+): Promise<User> => {
   return prisma.user.update({
     where: {
       id,
     },
-    data:{
-      naam,
-    },
+    data: changes,
   });
 };
 

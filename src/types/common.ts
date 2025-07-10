@@ -4,3 +4,11 @@ export interface Entity{
   // createdAt: Date;
   // updatedAt: Date;
 }
+
+export interface ListResponse<T> {
+  items: T[];
+}
+
+export interface IdParams {
+  id: number;
+}
