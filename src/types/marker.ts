@@ -3,11 +3,11 @@ import type { Entity, ListResponse } from './common';
 import type { Decimal } from '@prisma/client/runtime/library';
 export interface OrientatieMarker extends Entity{
   siteId: number;
-  wendeId?: number | null;
+  wendeId: number | null;
   naam: string;
-  beschrijving?: string | null;
-  breedtegraad: Decimal; // matches Decimal(10, 8)
-  lengtegraad: Decimal;  // matches Decimal(11, 8)
+  beschrijving: string | null;
+  breedtegraad: Decimal;
+  lengtegraad: Decimal;
 }
 
 export interface MarkerCreateInput{
@@ -15,8 +15,8 @@ export interface MarkerCreateInput{
   wendeId: number | null;
   naam: string;
   beschrijving: string | null;
-  breedtegraad: Decimal; // matches Decimal(10, 8)
-  lengtegraad: Decimal;  // matches Decimal(11, 8)
+  breedtegraad: Decimal;
+  lengtegraad: Decimal;
 }
 
 export interface MarkerUpdateInput extends MarkerCreateInput{}
