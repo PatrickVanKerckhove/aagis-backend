@@ -1,36 +1,33 @@
 // src/rest/user.ts
 import Router from '@koa/router';
 import * as userService from '../service/user';
-import type { Context} from 'koa';
 import type { AagisAppContext, AagisAppState} from '../types/koa';
 import type { KoaContext, KoaRouter } from '../types/koa';
 import type {
-  RegisterUserRequest,
+  CreateUserRequest,
+  CreateUserResponse,
   GetAllUsersResponse,
   GetUserByIdResponse,
   UpdateUserRequest,
   UpdateUserResponse,
-  LoginResponse,
-  GetUserRequest,
 } from '../types/user';
 import type { IdParams } from '../types/common';
 
 const getAllUsers = async (ctx: KoaContext<GetAllUsersResponse>) =>{
   const users = await userService.getAll();
-  ctx.body = {
-    items: users,
-  };      
+  ctx.body = { items: users };      
 };
 
-const getUserById = async (ctx: KoaContext<GetUserByIdResponse, GetUserRequest>)=>{
+const getUserById = async (ctx: KoaContext<GetUserByIdResponse, IdParams>)=>{
   const user = await userService.getById(Number(ctx.params.id));
+  ctx.status = 200;
   ctx.body = user;
 };
 
-const createUser = async (ctx: Context) =>{
-  const newUser = await userService.create(ctx.request.body!);
-  ctx.status = 201;  
-  ctx.body = newUser;
+const createUser = async (ctx: KoaContext<CreateUserResponse, void, CreateUserRequest>) =>{
+  const user = await userService.create(ctx.request.body);
+  ctx.status = 200;  
+  ctx.body = user;
 };
 
 const updateUser = async (ctx: KoaContext<UpdateUserResponse, IdParams, UpdateUserRequest>)=>{

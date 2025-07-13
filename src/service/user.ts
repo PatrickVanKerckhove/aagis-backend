@@ -18,9 +18,9 @@ export const getById = async (id: number) : Promise<User> => {
   return user;
 };
 
-export const create = async (user: UserCreateInput) : Promise<User> =>{
+export const create = async ({ naam }: UserCreateInput) : Promise<User> =>{
   return prisma.user.create({
-    data: user,
+    data: { naam },
   });
 };
 

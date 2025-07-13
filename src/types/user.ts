@@ -9,15 +9,15 @@ export interface UserCreateInput{
   naam: string;
 }
 
-export interface PublicUser extends Pick<User, 'id'|'naam'>{}
-
 export interface UserUpdateInput extends UserCreateInput{}
 
-export interface RegisterUserRequest{
-  naam: string,
+export interface CreateUserRequest {
+  naam: string;
 }
-export interface UpdateUserRequest extends RegisterUserRequest {}
 
-export interface GetAllUsersResponse extends ListResponse<PublicUser> {}
-export interface GetUserByIdResponse extends PublicUser {}
+export interface UpdateUserRequest extends CreateUserRequest {}
+
+export interface GetAllUsersResponse extends ListResponse<User> {}
+export interface GetUserByIdResponse extends User {}
+export interface CreateUserResponse extends GetUserByIdResponse {}
 export interface UpdateUserResponse extends GetUserByIdResponse {}
