@@ -2,8 +2,22 @@
 import {prisma} from '../data';
 import type { MarkerCreateInput, MarkerUpdateInput, OrientatieMarker } from '../types/marker';
 
-export const getAll = async ():Promise<OrientatieMarker[]> =>{
-  return prisma.orientatieMarker.findMany();
+export const getAll = async (): Promise<OrientatieMarker[]> => {
+  return prisma.orientatieMarker.findMany({
+    include: {
+      site: true,
+      wende: {
+        select: {
+          id: true,
+          siteId: true,
+          wendeType: true,
+          astronomischEvent: true,
+          datumTijd: true,
+          azimuthoek: true,
+        },
+      },
+    },
+  });
 };
 
 export const getById = async (id: number):Promise<OrientatieMarker> => {
@@ -12,6 +26,7 @@ export const getById = async (id: number):Promise<OrientatieMarker> => {
       id,
     },
     include:{
+      site: true,
       wende: {
         select: {
           id: true,
@@ -35,6 +50,9 @@ export const create = async (
 : Promise<OrientatieMarker> =>{
   return prisma.orientatieMarker.create({
     data: marker,
+    include: {
+      site: true,
+    },
   });
 };
 

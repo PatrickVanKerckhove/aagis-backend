@@ -1,4 +1,5 @@
 // src/types/marker.ts
+import type { ArcheologischeSite } from './archeosite';
 import type { Entity, ListResponse } from './common';
 import type { Decimal } from '@prisma/client/runtime/library';
 export interface OrientatieMarker extends Entity{
@@ -8,6 +9,7 @@ export interface OrientatieMarker extends Entity{
   beschrijving: string | null;
   breedtegraad: Decimal;
   lengtegraad: Decimal;
+  site?: ArcheologischeSite;
 }
 
 export interface MarkerCreateInput{
