@@ -196,10 +196,12 @@ async function main() {
       { 
         id: 1,
         naam: 'user',
+        email: 'user@aagis.be',
       },
       {
         id: 2,
         naam: 'admin',
+        email: 'admin@aagis.be',
       },
     ],
   }); 

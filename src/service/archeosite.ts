@@ -1,6 +1,8 @@
 // src/service/archeosite.ts
+import ServiceError from '../core/serviceError';
 import { prisma } from '../data';
 import type { ArcheologischeSite, ArcheoSiteCreateInput, ArcheoSiteUpdateInput } from '../types/archeosite';
+import handleDBError from './_handleDBError';
 
 export const getAll = async () : Promise<ArcheologischeSite[]> =>{
   return prisma.archeologischeSite.findMany();
@@ -34,7 +36,7 @@ export const getById = async (id: number) : Promise<ArcheologischeSite> => {
     },
   });
   if (!archeosite){
-    throw new Error('Er is geen archeologische site met dit id.');
+    throw ServiceError.notFound('Er is geen archeologische site met dit id.');
   }
   return archeosite;
 };
@@ -42,29 +44,41 @@ export const getById = async (id: number) : Promise<ArcheologischeSite> => {
 export const create = async (
   archeoSite : ArcheoSiteCreateInput) 
 : Promise<ArcheologischeSite> =>{
-  return prisma.archeologischeSite.create({
-    data: archeoSite,
-  });
+  try{
+    return await prisma.archeologischeSite.create({
+      data: archeoSite,
+    });
+  } catch (error: any) {
+    throw handleDBError(error);
+  }
 };
 
 export const updateById = async (
   id: number, 
   changes : ArcheoSiteUpdateInput) 
 : Promise<ArcheologischeSite> => {
-  return prisma.archeologischeSite.update({
-    where: {
-      id,
-    },
-    data: changes,
-  });
+  try{
+    return await prisma.archeologischeSite.update({
+      where: {
+        id,
+      },
+      data: changes,
+    });
+  } catch (error: any) {
+    throw handleDBError(error);
+  }
 };
 
 export const deleteById = async (id: number) : Promise<void> => {
-  await prisma.archeologischeSite.delete({
-    where: {
-      id,
-    },
-  });
+  try{
+    await prisma.archeologischeSite.delete({
+      where: {
+        id,
+      },
+    });
+  } catch (error: any) {
+    throw handleDBError(error);
+  }
 };
 
 export const getMarkersBySiteId = (siteId: number) =>{

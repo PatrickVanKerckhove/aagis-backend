@@ -1,6 +1,8 @@
 // src/service/wende.ts
+import ServiceError from '../core/serviceError';
 import {prisma} from '../data';
 import type { Wende, WendeCreateInput, WendeUpdateInput } from '../types/wende';
+import handleDBError from './_handleDBError';
 
 export const getAll = async ():Promise<Wende[]> =>{
   return prisma.wende.findMany();
@@ -24,7 +26,7 @@ export const getById = async (id: number):Promise<Wende> => {
     },
   });
   if (!wende){
-    throw new Error('Er is geen wende met dit id.');
+    throw ServiceError.notFound('Er is geen wende met dit id.');
   }
   return wende;
 };
@@ -32,27 +34,39 @@ export const getById = async (id: number):Promise<Wende> => {
 export const create = async (
   wende : WendeCreateInput) 
 : Promise<Wende> =>{
-  return prisma.wende.create({
-    data: wende,
-  });
+  try{
+    return await prisma.wende.create({
+      data: wende,
+    });
+  } catch (error: any) {
+    throw handleDBError(error);
+  }
 };
 
 export const updateById = async (
   id: number, 
   changes:WendeUpdateInput) 
 : Promise<Wende> => {
-  return prisma.wende.update({
-    where: {
-      id,
-    },
-    data: changes,
-  });
+  try{
+    return await prisma.wende.update({
+      where: {
+        id,
+      },
+      data: changes,
+    });
+  } catch (error: any) {
+    throw handleDBError(error);
+  }
 };
 
 export const deleteById = async (id: number) : Promise<void> => {
-  await prisma.wende.delete({
-    where: {
-      id,
-    },
-  });
+  try{
+    await prisma.wende.delete({
+      where: {
+        id,
+      },
+    });
+  } catch (error: any) {
+    throw handleDBError(error);
+  }
 };

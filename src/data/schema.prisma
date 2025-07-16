@@ -32,7 +32,7 @@ model Wende {
 model ArcheologischeSite{
   @@map("archeosites")     // Set the table name to "archeosites"
   id           Int         @id @default(autoincrement()) @db.UnsignedInt
-  naam         String      @db.VarChar(255)
+  naam         String      @unique(map: "idx_archeosite_naam_unique") @db.VarChar(255)
   land         String      @db.VarChar(255)
   beschrijving String?     @db.Text
   breedtegraad Decimal     @db.Decimal(10, 8) //10 cijfers in totaal, 8 na komma
@@ -46,6 +46,7 @@ model User{
   @@map("users")
   id           Int         @id @default(autoincrement()) @db.UnsignedInt
   naam         String      @db.VarChar(255)
+  email        String      @unique(map: "idx_user_email_unique") @db.VarChar(255)
 }
 enum WendeType {
   ZOMERZONNEWENDE

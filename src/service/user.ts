@@ -1,4 +1,5 @@
 // src/service/user.ts
+import ServiceError from '../core/serviceError';
 import { prisma } from '../data';
 import type { User, UserCreateInput, UserUpdateInput } from '../types/user';
 
@@ -13,14 +14,14 @@ export const getById = async (id: number) : Promise<User> => {
     },
   });
   if (!user){
-    throw new Error('Er is geen user met dit id.');
+    throw ServiceError.notFound('Er is geen user met dit id.');
   }
   return user;
 };
 
-export const create = async ({ naam }: UserCreateInput) : Promise<User> =>{
+export const create = async ({ naam, email }: UserCreateInput) : Promise<User> =>{
   return prisma.user.create({
-    data: { naam },
+    data: { naam, email },
   });
 };
 

@@ -35,6 +35,7 @@ CREATE TABLE `archeosites` (
     `hoogte` DECIMAL(6, 2) NULL,
     `foto` VARCHAR(255) NULL,
 
+    UNIQUE INDEX `idx_archeosite_naam_unique`(`naam`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -42,7 +43,9 @@ CREATE TABLE `archeosites` (
 CREATE TABLE `users` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `naam` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL,
 
+    UNIQUE INDEX `idx_user_email_unique`(`email`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
