@@ -2,7 +2,6 @@
 import Router from '@koa/router';
 import * as archeositeService from '../service/archeosite';
 import * as wendeService from '../service/wende';
-
 import type { AagisAppState, AagisAppContext } from '../types/koa';
 import type { KoaContext, KoaRouter } from '../types/koa';
 import type {
@@ -14,6 +13,9 @@ import type {
   UpdateWendeResponse,
 } from '../types/wende';
 import type { IdParams } from '../types/common';
+import Joi from 'joi';
+import validate from '../core/validation';
+import { WendeType, AstronomischEvent } from '@prisma/client';
 
 const getAllWendes = async (ctx: KoaContext<GetAllWendesResponse>) =>{
   const wendes = await wendeService.getAll();
@@ -21,10 +23,16 @@ const getAllWendes = async (ctx: KoaContext<GetAllWendesResponse>) =>{
     items: wendes,
   };      
 };
+getAllWendes.validationScheme = null;
 
 const getWendeById = async (ctx: KoaContext<GetWendeByIdResponse, IdParams>)=>{
-  const wende = await wendeService.getById(Number(ctx.params.id));
+  const wende = await wendeService.getById(ctx.params.id);
   ctx.body = wende;
+};
+getWendeById.validationScheme = {
+  params: {
+    id: Joi.number().integer().positive(),
+  },
 };
 
 const createWende = async (
@@ -34,6 +42,18 @@ const createWende = async (
   ctx.status = 201;  
   ctx.body = newWende;
 };
+createWende.validationScheme = {
+  body: {
+    siteId: Joi.number().integer().positive(),
+    wendeType: Joi.string().valid(WendeType),
+    astronomischEvent: Joi.string().valid(AstronomischEvent),
+    datumTijd: Joi.date().iso(),
+    azimuthoek: Joi.number()
+      .precision(2)
+      .min(0)
+      .max(360),
+  },
+};
 
 const updateWende = async (
   ctx: KoaContext<UpdateWendeResponse, IdParams, UpdateWendeRequest>,
@@ -41,10 +61,28 @@ const updateWende = async (
   const wende = await wendeService.updateById(Number(ctx.params.id), ctx.request.body!);
   ctx.body = wende;
 };
+updateWende.validationScheme = {
+  body: {
+    siteId: Joi.number().optional().integer().positive(),
+    wendeType: Joi.string().optional().valid(WendeType),
+    astronomischEvent: Joi.string().optional().valid(AstronomischEvent),
+    datumTijd: Joi.date().optional().iso(),
+    azimuthoek: Joi.number()
+      .optional()
+      .precision(2)
+      .min(0)
+      .max(360),
+  },
+};
 
 const deleteWende = async (ctx: KoaContext<void, IdParams>)=>{
   await wendeService.deleteById(Number(ctx.params.id));
   ctx.status = 204;
+};
+deleteWende.validationScheme = {
+  params: {
+    id: Joi.number().integer().positive(),
+  },
 };
 
 const getWendesBySiteId = async (ctx: KoaContext<GetAllWendesResponse, IdParams>)=>{
@@ -61,11 +99,16 @@ export default (parent: KoaRouter) => {
     prefix: '/wendes', 
   });
 
-  router.get('/', getAllWendes);
-  router.get('/:id', getWendeById);
-  router.post('/', createWende);
-  router.put('/:id', updateWende);
-  router.delete('/:id', deleteWende);
+  router.get('/', validate(getAllWendes.validationScheme),
+    getAllWendes);
+  router.get('/:id', validate(getWendeById.validationScheme),
+    getWendeById);
+  router.post('/', validate(createWende.validationScheme),
+    createWende);
+  router.put('/:id', validate(updateWende.validationScheme),
+    updateWende);
+  router.delete('/:id', validate(deleteWende.validationScheme),
+    deleteWende);
 
   // GET /api/wendes/:siteId/archeosites
   router.get('/:id/archeosites', getWendesBySiteId);
