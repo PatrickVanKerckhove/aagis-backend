@@ -44,9 +44,11 @@ model ArcheologischeSite{
 }
 model User{
   @@map("users")
-  id           Int         @id @default(autoincrement()) @db.UnsignedInt
-  naam         String      @db.VarChar(255)
-  email        String      @unique(map: "idx_user_email_unique") @db.VarChar(255)
+  id            Int     @id @default(autoincrement()) @db.UnsignedInt
+  naam          String  @db.VarChar(255)
+  email         String  @unique(map: "idx_user_email_unique") @db.VarChar(255)
+  password_hash String  @db.VarChar(255)
+  roles         Json
 }
 enum WendeType {
   ZOMERZONNEWENDE

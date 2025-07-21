@@ -9,6 +9,7 @@ export default {
     maxAge: 3 * 60 * 60, // 3uur (in seconden)
   },
   auth: {
+    maxDelay: 5000, //msec (5sec)
     jwt: {
       audience: 'aagis.hogent.be',
       issuer: 'aagis.hogent.be',

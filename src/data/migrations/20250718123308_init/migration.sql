@@ -44,6 +44,8 @@ CREATE TABLE `users` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `naam` VARCHAR(255) NOT NULL,
     `email` VARCHAR(255) NOT NULL,
+    `password_hash` VARCHAR(255) NOT NULL,
+    `roles` JSON NOT NULL,
 
     UNIQUE INDEX `idx_user_email_unique`(`email`),
     PRIMARY KEY (`id`)

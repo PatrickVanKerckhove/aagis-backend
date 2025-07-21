@@ -16,6 +16,7 @@ import type { IdParams } from '../types/common';
 import Joi from 'joi';
 import validate from '../core/validation';
 import { WendeType, AstronomischEvent } from '@prisma/client';
+import { requireAuthentication } from '../core/auth';
 
 const getAllWendes = async (ctx: KoaContext<GetAllWendesResponse>) =>{
   const wendes = await wendeService.getAll();
@@ -98,6 +99,8 @@ export default (parent: KoaRouter) => {
   const router = new Router<AagisAppState, AagisAppContext>({ 
     prefix: '/wendes', 
   });
+
+  router.use(requireAuthentication);
 
   router.get('/', validate(getAllWendes.validationScheme),
     getAllWendes);

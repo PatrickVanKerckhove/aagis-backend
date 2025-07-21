@@ -133,6 +133,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-#test file
+# test file
 src/testjwt.ts
 src/testpw.ts
+# overzicht tree (alle padnamen en bestanden)
+tree_output.txt

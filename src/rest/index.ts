@@ -5,6 +5,7 @@ import installArcheositeRouter from './archeosite';
 import installMarkerRouter from './marker';
 import installWendeRouter from './wende';
 import installUserRouter from './user';
+import installSessionRouter from './session';
 import type {
   AagisAppContext,
   AagisAppState,
@@ -21,6 +22,7 @@ export default (app: KoaApplication)=>{
   installMarkerRouter(router);
   installWendeRouter(router);
   installUserRouter(router);
+  installSessionRouter(router);
 
   app.use(router.routes())
     .use(router.allowedMethods());

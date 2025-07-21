@@ -1,5 +1,7 @@
 // src/data/seed.ts
 import { PrismaClient, WendeType, AstronomischEvent} from '@prisma/client';
+import { hashPassword } from '../core/password';
+import Role from '../core/roles';
 
 const prisma = new PrismaClient();
 
@@ -191,17 +193,29 @@ async function main() {
   });
 
   // Seed users
+  const passwordHash = await hashPassword('12345678');
   await prisma.user.createMany({
     data: [
       { 
         id: 1,
-        naam: 'user',
-        email: 'user@aagis.be',
+        naam: 'admin',
+        email: 'admin@aagis.be',
+        password_hash: passwordHash,
+        roles: JSON.stringify([Role.ADMIN, Role.USER]),
       },
       {
         id: 2,
-        naam: 'admin',
-        email: 'admin@aagis.be',
+        naam: 'user',
+        email: 'user@aagis.be',
+        password_hash: passwordHash,
+        roles: JSON.stringify([Role.USER]),
+      },
+      {
+        id: 3,
+        naam: 'user2',
+        email: 'user2@aagis.be',
+        password_hash: passwordHash,
+        roles: JSON.stringify([Role.USER]),
       },
     ],
   }); 

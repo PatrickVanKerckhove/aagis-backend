@@ -2,8 +2,11 @@
 import type { ParameterizedContext } from 'koa';
 import type Application from 'koa';
 import type Router from '@koa/router';
+import type { SessionInfo } from './auth';
 
-export interface AagisAppState {}
+export interface AagisAppState {
+  session: SessionInfo;
+}
 
 export interface AagisAppContext<
   Params = unknown,

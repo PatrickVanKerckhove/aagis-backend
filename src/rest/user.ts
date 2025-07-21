@@ -5,15 +5,34 @@ import type { AagisAppContext, AagisAppState} from '../types/koa';
 import type { KoaContext, KoaRouter } from '../types/koa';
 import type {
   CreateUserRequest,
-  CreateUserResponse,
   GetAllUsersResponse,
   GetUserByIdResponse,
+  GetUserRequest,
+  LoginResponse,
   UpdateUserRequest,
   UpdateUserResponse,
 } from '../types/user';
 import type { IdParams } from '../types/common';
 import Joi from 'joi';
 import validate from '../core/validation';
+import { requireAuthentication, makeRequireRole, authDelay } from '../core/auth';
+import Role from '../core/roles';
+import type { Next } from 'koa';
+
+const checkUserId = (ctx: KoaContext<unknown, GetUserRequest>, next: Next) => {
+  const { userId, roles } = ctx.state.session;
+  const { id } = ctx.params;
+
+  // You can only get our own data unless you're an admin
+  if (id !== 'me' && id !== userId && !roles.includes(Role.ADMIN)) {
+    return ctx.throw(
+      403,
+      'You are not allowed to view this user\'s information',
+      { code: 'FORBIDDEN' },
+    );
+  }
+  return next();
+};
 
 const getAllUsers = async (ctx: KoaContext<GetAllUsersResponse>) =>{
   const users = await userService.getAll();
@@ -21,26 +40,32 @@ const getAllUsers = async (ctx: KoaContext<GetAllUsersResponse>) =>{
 };
 getAllUsers.validationScheme = null;
 
-const getUserById = async (ctx: KoaContext<GetUserByIdResponse, IdParams>)=>{
-  const user = await userService.getById(ctx.params.id);
+const getUserById = async (ctx: KoaContext<GetUserByIdResponse, GetUserRequest>)=>{
+  const user = await userService.getById(
+    ctx.params.id === 'me' ? ctx.state.session.userId : ctx.params.id,
+  );
   ctx.status = 200;
   ctx.body = user;
 };
 getUserById.validationScheme = {
   params: {
-    id: Joi.number().integer().positive(),
+    id: Joi.alternatives().try(
+      Joi.number().integer().positive(), //optie 1 - gewoon id
+      Joi.string().valid('me'),
+    ),
   },
 };
 
-const createUser = async (ctx: KoaContext<CreateUserResponse, void, CreateUserRequest>) =>{
-  const user = await userService.create(ctx.request.body);
+const registerUser = async (ctx: KoaContext<LoginResponse, void, CreateUserRequest>) =>{
+  const token = await userService.register(ctx.request.body);
   ctx.status = 200;  
-  ctx.body = user;
+  ctx.body = { token };
 };
-createUser.validationScheme = {
+registerUser.validationScheme = {
   body: {
     naam: Joi.string().max(255),
-    email: Joi.string().email(), 
+    email: Joi.string().email(),
+    password: Joi.string().min(8).max(128),
   },
 };
 
@@ -70,15 +95,31 @@ export default (parent: KoaRouter)=>{
   const router = new Router<AagisAppState, AagisAppContext> ({
     prefix: '/users',
   });
-  router.get('/', validate(getAllUsers.validationScheme),
+
+  router.post('/', authDelay, validate(registerUser.validationScheme),
+    registerUser );
+
+  const requireAdmin = makeRequireRole(Role.ADMIN);  
+   
+  router.get('/', 
+    requireAuthentication,
+    requireAdmin,
+    validate(getAllUsers.validationScheme),
     getAllUsers );
-  router.get('/:id', validate(getUserById.validationScheme),
+  router.get('/:id', 
+    requireAuthentication,
+    validate(getUserById.validationScheme),
+    checkUserId,
     getUserById );
-  router.post('/', validate(createUser.validationScheme),
-    createUser );
-  router.put('/:id', validate(updateUser.validationScheme),
+  router.put('/:id', 
+    requireAuthentication,
+    validate(updateUser.validationScheme),
+    checkUserId,
     updateUser);
-  router.delete('/:id', validate(deleteUser.validationScheme),
+  router.delete('/:id', 
+    requireAuthentication,
+    validate(deleteUser.validationScheme),
+    checkUserId,
     deleteUser);
 
   // de users router hangen onder parent

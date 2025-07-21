@@ -15,6 +15,7 @@ import type {
 import type { IdParams } from '../types/common';
 import Joi from 'joi';
 import validate from '../core/validation';
+import { requireAuthentication } from '../core/auth';
 
 const getAllArcheosites = async (ctx: KoaContext<GetAllArcheoSitesResponse>) =>{
   const archeosites = await archeositeService.getAll();
@@ -109,6 +110,8 @@ export default (parent: KoaRouter)=>{
   const router = new Router<AagisAppState, AagisAppContext>({
     prefix: '/archeosites',
   });
+  router.use(requireAuthentication);
+  
   router.get('/', validate(getAllArcheosites.validationScheme),
     getAllArcheosites );
   router.get('/:id', validate(getArcheositeById.validationScheme), 

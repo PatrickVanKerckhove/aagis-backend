@@ -16,6 +16,7 @@ import type {
 import type { IdParams } from '../types/common';
 import Joi from 'joi';
 import validate from '../core/validation';
+import { requireAuthentication } from '../core/auth';
 
 const getAllMarkers = async (ctx: KoaContext<GetAllMarkersResponse>) =>{
   const wendes = await markerService.getAll();
@@ -108,6 +109,8 @@ export default (parent: KoaRouter) => {
     prefix: '/markers', 
   });
 
+  router.use(requireAuthentication);
+  
   router.get('/', validate(getAllMarkers.validationScheme),
     getAllMarkers);
   router.get('/:id', validate(getMarkerById.validationScheme),
