@@ -67,6 +67,9 @@ const updateMarker = async (
   ctx.body = marker;
 };
 updateMarker.validationScheme = {
+  params: {
+    id: Joi.number().integer().positive(),
+  },
   body: {
     siteId: Joi.number().optional().integer().positive(),
     wendeId: Joi.number().optional().integer().positive(),

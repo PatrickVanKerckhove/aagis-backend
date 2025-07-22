@@ -1,9 +1,10 @@
 // __tests__/rest/archeosites.spec.ts
-import supertest from 'supertest';
-import createServer from '../../src/createServer';
-import type { Server } from '../../src/createServer';
+import type supertest from 'supertest';
 import { AstronomischEvent, Prisma, WendeType } from '@prisma/client';
 import { prisma } from '../../src/data';
+import withServer from '../helpers/withServer';
+import { login } from '../helpers/login';
+import testAuthHeader from '../helpers/testAuthHeader';
 
 const data = {
   archeosites: [
@@ -73,15 +74,15 @@ const dataToDelete ={
 };
 
 describe('Archeosites', () => {
-  let server: Server;
+  let authHeader: string;
   let request: supertest.Agent;
-
-  beforeAll(async() => {
-    server = await createServer();
-    request = supertest(server.getApp().callback());
+  
+  withServer((r) => {
+    request = r;
   });
-  afterAll(async() => {
-    await server.stop();
+
+  beforeAll(async() =>{
+    authHeader = await login(request);
   });
 
   const url = '/api/archeosites';
@@ -106,7 +107,9 @@ describe('Archeosites', () => {
     });
 
     it('should 200 and return all archeosites', async () => {
-      const response = await request.get(url);
+      const response = await request
+        .get(url)
+        .set('Authorization', authHeader);
       expect(response.status).toBe(200);
       expect(response.body.items.length).toBe(2);
 
@@ -134,6 +137,15 @@ describe('Archeosites', () => {
         ]),
       );
     });
+    it('should 400 when given an argument', async () => {
+      const response = await request.get(`${url}?invalid=true`).set('Authorization', authHeader);
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body.code).toBe('VALIDATION_FAILED');
+      expect(response.body.details.query).toHaveProperty('invalid');
+    });
+
+    testAuthHeader(() => request.get(url));
   });
 
   describe('GET /api/archeosites/:id', () => {
@@ -154,7 +166,9 @@ describe('Archeosites', () => {
       });
     });
     it('should 200 and return the requested archeosite', async()=>{
-      const response = await request.get(`${url}/1`);
+      const response = await request
+        .get(`${url}/1`)
+        .set('Authorization', authHeader);
 
       expect(response.statusCode).toBe(200);
       expect(response.body).toEqual({
@@ -201,15 +215,18 @@ describe('Archeosites', () => {
     });
   
     it('should 201 and return the created archeosite', async () => {
-      const response = await request.post(url).send({
-        naam: 'test naam',
-        land: 'test land',
-        beschrijving: 'test beschrijving',
-        breedtegraad: '50.2',
-        lengtegraad: '-12.8',
-        hoogte: '10.5',
-        foto: '/images/testimage.jpg',
-      });
+      const response = await request
+        .post(url)
+        .set('Authorization', authHeader)
+        .send({
+          naam: 'test naam',
+          land: 'test land',
+          beschrijving: 'test beschrijving',
+          breedtegraad: '50.2',
+          lengtegraad: '-12.8',
+          hoogte: '10.5',
+          foto: '/images/testimage.jpg',
+        });
 
       expect(response.status).toBe(201);
       expect(response.body.id).toBeTruthy();
@@ -243,14 +260,19 @@ describe('Archeosites', () => {
       });
     });
     it('should 200 and return the updated archeologicSite', async()=>{
-      const response = await request.put(`${url}/1`)
+      const response = await request
+        .put(`${url}/1`)
         .send({
           naam: 'updated naam',
           land: 'updated land',
           beschrijving: 'updated beschrijving',
           breedtegraad: new Prisma.Decimal('53.2'),
           lengtegraad: new Prisma.Decimal('-10.8'),
-        });
+        })
+        .set('Authorization', authHeader);
+
+      /*console.log('Response:', response.statusCode, response.body);
+      console.log('Validation errors:', JSON.stringify(response.body.details, null, 2)); */
 
       expect(response.statusCode).toBe(200);
       expect(response.body.id).toEqual(1);
@@ -280,7 +302,9 @@ describe('Archeosites', () => {
       });
     });
     it('should 204 and return nothing', async ()=>{
-      const response = await request.delete(`${url}/1`);
+      const response = await request
+        .delete(`${url}/1`)
+        .set('Authorization', authHeader);
 
       expect(response.statusCode).toBe(204);
       expect(response.body).toEqual({});

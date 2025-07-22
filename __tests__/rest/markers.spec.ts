@@ -1,9 +1,9 @@
 // __tests__/rest/markers.spec.ts
-import supertest from 'supertest';
-import createServer from '../../src/createServer';
-import type { Server } from '../../src/createServer';
+import type supertest from 'supertest';
 import { Prisma, AstronomischEvent, WendeType } from '@prisma/client';
 import { prisma } from '../../src/data';
+import { login } from '../helpers/login';
+import withServer from '../helpers/withServer';
 
 const data = {
   archeosites: [
@@ -57,16 +57,15 @@ const dataToDelete ={
 };
 
 describe('OrientatieMarkers', () => {
-  let server: Server;
+  let authHeader: string;
   let request: supertest.Agent;
-
-  beforeAll(async() => {
-    server = await createServer();
-    request = supertest(server.getApp().callback());
+    
+  withServer((r) => {
+    request = r;
   });
-
-  afterAll(async() => {
-    await server.stop();
+  
+  beforeAll(async() =>{
+    authHeader = await login(request);
   });
 
   const url = '/api/markers';
@@ -90,7 +89,9 @@ describe('OrientatieMarkers', () => {
     });
 
     it('should 200 and return all markers', async() => {
-      const response = await request.get(url);
+      const response = await request
+        .get(url)
+        .set('Authorization', authHeader);
       expect(response.status).toBe(200);
       expect(response.body.items.length).toBe(2);
 
@@ -176,14 +177,17 @@ describe('OrientatieMarkers', () => {
     });
 
     it('should 201 and return the created marker', async() => {
-      const response = await request.post(url).send({
-        siteId: 1,
-        wendeId: 1,
-        naam: 'test marker',
-        beschrijving: 'test marker beschrijving',
-        breedtegraad: new Prisma.Decimal('51.2'),
-        lengtegraad: new Prisma.Decimal('-1.8'),
-      });
+      const response = await request
+        .post(url)
+        .send({
+          siteId: 1,
+          wendeId: 1,
+          naam: 'test marker',
+          beschrijving: 'test marker beschrijving',
+          breedtegraad: new Prisma.Decimal('51.2'),
+          lengtegraad: new Prisma.Decimal('-1.8'),
+        })
+        .set('Authorization', authHeader);
 
       expect(response.status).toBe(201);
       expect(response.body.id).toBeTruthy();

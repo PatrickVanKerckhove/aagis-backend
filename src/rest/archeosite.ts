@@ -72,6 +72,9 @@ const updateArcheosite = async (
   ctx.body = archeologischeSite;
 };
 updateArcheosite.validationScheme = {
+  params: {
+    id: Joi.number().integer().positive(),
+  },
   body: {
     naam: Joi.string().optional().max(255),
     land: Joi.string().optional().max(255),

@@ -1,21 +1,13 @@
-// --tests/rest/health.spec.ts
-import supertest from 'supertest';
-import createServer from '../../src/createServer';
-import type { Server } from '../../src/createServer';
+// __tests__/rest/health.spec.ts
+import type supertest from 'supertest';
 import packageJson from '../../package.json';
+import withServer from '../helpers/withServer';
 
 describe('Health', () => {
-
-  let server: Server;
   let request: supertest.Agent;
-
-  beforeAll(async () => {
-    server = await createServer();
-    request = supertest(server.getApp().callback());
-  });
-
-  afterAll(async () => {
-    await server.stop();
+    
+  withServer((r) => {
+    request = r;
   });
 
   describe('GET /api/health/ping', () => {

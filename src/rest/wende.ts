@@ -63,6 +63,9 @@ const updateWende = async (
   ctx.body = wende;
 };
 updateWende.validationScheme = {
+  params: {
+    id: Joi.number().integer().positive(),
+  },
   body: {
     siteId: Joi.number().optional().integer().positive(),
     wendeType: Joi.string().optional().valid(WendeType),
