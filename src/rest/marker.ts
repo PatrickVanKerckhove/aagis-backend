@@ -18,6 +18,129 @@ import Joi from 'joi';
 import validate from '../core/validation';
 import { requireAuthentication } from '../core/auth';
 
+/**
+ * @swagger
+ * tags:
+ *   name: Markers
+ *   description: Represents an orientation marker, a point seen at the horizon that marks where an astronomical event, like a solstice or lunar standstill, occurs.
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Marker:
+ *       allOf:
+ *         - $ref: "#/components/schemas/Base"
+ *         - type: object
+ *           required:
+ *             - archeosite
+ *             - naam
+ *             - breedtegraad
+ *             - lengtegraad
+ *           properties:
+ *             archeosite:
+ *               $ref: "#/components/schemas/ArcheologischeSite"
+ *             wende:
+ *               $ref: "#/components/schemas/Wende"
+ *             naam:
+ *               type: string
+ *             beschrijving:
+ *               type: string
+ *               nullable: true
+ *             breedtegraad:
+ *               type: number
+ *               minimum: -90
+ *               maximum: 90
+ *             lengtegraad:
+ *               type: number
+ *               minimum: -180
+ *               maximum: 180
+ *           example:
+ *             id: 1
+ *             archeosite:
+ *               id: 1
+ *               naam: "Stonehenge"
+ *               land: "Engeland"
+ *               beschrijving: "Prehistorisch monument in Wiltshire, Engeland."
+ *               breedtegraad: 51.178883
+ *               lengtegraad: -1.826204
+ *               hoogte: 101.0
+ *               foto: "/images/Stonehenge_800x600.jpg"
+ *             wende: 
+ *               id: 1
+ *               siteId: 1
+ *               wendeType: ZOMERZONNEWENDE
+ *               astronomischEvent: OPGANG
+ *               datumTijd: "2023-06-21T04:52:00Z"
+ *               azimuthoek: 51.3
+ *             naam: "Heel Stone"
+ *             beschrijving: "Megaliet in lijn met de zonsopgang tijdens de zomerzonnewende."
+ *             breedtegraad: 51.179085
+ *             lengtegraad: -1.825797
+ *     MarkerList:
+ *       required:
+ *         - items
+ *       properties:
+ *         items:
+ *           type: array
+ *           items:
+ *             $ref: "#/components/schemas/Marker"
+ *
+ *   requestBodies:
+ *     Marker:
+ *       description: The marker info to save
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               archeosite:
+ *                 $ref: "#/components/schemas/ArcheologischeSite"
+ *               wende:
+ *                 $ref: "#/components/schemas/Wende"
+ *               naam:
+ *                 type: string
+ *               beschrijving:
+ *                 type: string
+ *                 nullable: true
+ *               breedtegraad:
+ *                 type: number
+ *                 minimum: -90
+ *                 maximum: 90
+ *               lengtegraad:
+ *                 type: number
+ *                 minimum: -180
+ *                 maximum: 180
+ *             required:
+ *               - archeosite
+ *               - naam
+ *               - breedtegraad
+ *               - lengtegraad
+ */
+
+/**
+ * @swagger
+ * /api/markers:
+ *   get:
+ *     summary: Get all orientation markers
+ *     tags:
+ *       - Markers
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of orientation markers
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/MarkerList"
+ *       400:
+ *         $ref: '#/components/responses/400BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/401Unauthorized'
+ */
 const getAllMarkers = async (ctx: KoaContext<GetAllMarkersResponse>) =>{
   const wendes = await markerService.getAll();
   ctx.body = {
@@ -26,6 +149,31 @@ const getAllMarkers = async (ctx: KoaContext<GetAllMarkersResponse>) =>{
 };
 getAllMarkers.validationScheme = null;
 
+/**
+ * @swagger
+/api/markers/{id}:
+ *   get:
+ *     summary: Get a single marker
+ *     tags:
+ *      - Markers
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: "#/components/parameters/idParam"
+ *     responses:
+ *       200:
+ *         description: The requested marker
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Marker"
+ *       400:
+ *         $ref: '#/components/responses/400BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/401Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/404NotFound'
+ */
 const getMarkerById = async (ctx: KoaContext<GetMarkerByIdResponse, IdParams>)=>{
   const marker = await markerService.getById(ctx.params.id);
   ctx.body = marker;
@@ -36,6 +184,32 @@ getMarkerById.validationScheme = {
   },
 };
 
+/**
+ * @swagger
+ * /api/markers:
+ *   post:
+ *     summary: Create a new marker
+ *     description: Creates a new marker.
+ *     tags:
+ *      - Markers
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       $ref: "#/components/requestBodies/Marker"
+ *     responses:
+ *       200:
+ *         description: The created marker
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Marker"
+ *       400:
+ *         $ref: '#/components/responses/400BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/401Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/404NotFound'
+ */
 const createMarker = async (
   ctx: KoaContext<CreateMarkerResponse, void, CreateMarkerRequest>,
 ) =>{
@@ -60,6 +234,33 @@ createMarker.validationScheme = {
   },  
 };
 
+/**
+ * @swagger
+ * /api/markers/{id}:
+ *   put:
+ *     summary: Update an existing marker
+ *     tags:
+ *      - Markers
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: "#/components/parameters/idParam"
+ *     requestBody:
+ *       $ref: "#/components/requestBodies/Marker"
+ *     responses:
+ *       200:
+ *         description: The updated marker
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Marker"
+ *       400:
+ *         $ref: '#/components/responses/400BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/401Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/404NotFound'
+ */
 const updateMarker = async (
   ctx: KoaContext<UpdateMarkerResponse, IdParams, UpdateMarkerRequest>,
 )=>{
@@ -88,6 +289,27 @@ updateMarker.validationScheme = {
   }, 
 };
 
+/**
+ * @swagger
+ * /api/markers/{id}:
+ *   delete:
+ *     summary: Delete a marker
+ *     tags:
+ *      - Markers
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: "#/components/parameters/idParam"
+ *     responses:
+ *       204:
+ *         description: No response, the delete was successful.
+ *       400:
+ *         $ref: '#/components/responses/400BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/401Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/404NotFound'
+ */
 const deleteMarker = async (ctx: KoaContext<void, IdParams>)=>{
   await markerService.deleteById(Number(ctx.params.id));
   ctx.status = 204;

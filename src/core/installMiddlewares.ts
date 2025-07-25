@@ -6,10 +6,15 @@ import type { KoaApplication } from '../types/koa';
 import { getLogger } from './logging';
 import ServiceError from './serviceError';
 import koaHelmet from 'koa-helmet';
+import { koaSwagger } from 'koa2-swagger-ui';
+import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerOptions from '../../swagger.config';
 
 const NODE_ENV = config.get<string>('env');
 const CORS_ORIGINS = config.get<string[]>('cors.origins');
 const CORS_MAX_AGE = config.get<number>('cors.maxAge');
+
+const isDevelopment = NODE_ENV === 'development';
 
 export default function installMiddlewares(app: KoaApplication) {
   app.use(
@@ -45,7 +50,9 @@ export default function installMiddlewares(app: KoaApplication) {
   });
 
   app.use(bodyParser());
-  app.use(koaHelmet());
+  app.use(koaHelmet({
+    contentSecurityPolicy: !isDevelopment,
+  }));
 
   app.use(async (ctx, next) => {
     try {
@@ -91,6 +98,18 @@ export default function installMiddlewares(app: KoaApplication) {
       ctx.body = errorBody;
     }
   });
+
+  if(isDevelopment) {
+    const spec = swaggerJSDoc(swaggerOptions) as Record<string, unknown>;
+    app.use(
+      koaSwagger({
+        routePrefix: '/swagger',
+        specPrefix: '/swagger.json',
+        exposeSpec: true,
+        swaggerOptions: { spec },
+      }),
+    );
+  }
 
   app.use(async (ctx, next) => {
     await next();
