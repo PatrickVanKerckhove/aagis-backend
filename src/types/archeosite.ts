@@ -8,23 +8,31 @@ export interface ArcheologischeSite extends Entity{
   beschrijving: string | null;
   breedtegraad: Decimal; // matches Decimal(10, 8)
   lengtegraad: Decimal;  // matches Decimal(11, 8)
-  hoogte: Decimal | null;      // matches Decimal(6, 2)
+  hoogte: number | null;
   foto: string | null;
+  createdBy: number;
+  isPublic: boolean;
 }
-export interface ArcheoSiteCreateInput{
+export interface CreateArcheoSiteRequest{
   naam: string;
   land: string;
   beschrijving: string | null;
   breedtegraad: Decimal; // matches Decimal(10, 8)
   lengtegraad: Decimal;  // matches Decimal(11, 8)
-  hoogte: Decimal | null;      // matches Decimal(6, 2)
+  hoogte: number | null;
   foto: string | null;
 }
 
-export interface ArcheoSiteUpdateInput extends ArcheoSiteCreateInput{}
+export interface ArcheoSiteCreateInput extends CreateArcheoSiteRequest{
+  createdBy: number;
+  isPublic?: boolean;
+}
 
-export interface CreateArcheoSiteRequest extends ArcheoSiteCreateInput{}
-export interface UpdateArcheoSiteRequest extends ArcheoSiteCreateInput{}
+export interface ArcheoSiteUpdateInput extends Partial<CreateArcheoSiteRequest> {
+  isPublic?: boolean;
+}
+
+export interface UpdateArcheoSiteRequest extends ArcheoSiteUpdateInput{}
 
 export interface GetAllArcheoSitesResponse extends ListResponse<ArcheologischeSite>{}
 export interface GetArcheoSiteByIdResponse extends ArcheologischeSite {}

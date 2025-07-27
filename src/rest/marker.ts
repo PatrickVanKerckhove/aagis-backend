@@ -17,6 +17,8 @@ import type { IdParams } from '../types/common';
 import Joi from 'joi';
 import validate from '../core/validation';
 import { requireAuthentication } from '../core/auth';
+import Role from '../core/roles';
+import type { Next } from 'koa';
 
 /**
  * @swagger
@@ -34,15 +36,18 @@ import { requireAuthentication } from '../core/auth';
  *         - $ref: "#/components/schemas/Base"
  *         - type: object
  *           required:
- *             - archeosite
+ *             - siteId
  *             - naam
  *             - breedtegraad
  *             - lengtegraad
+ *             - createdBy
+ *             - isPublic
  *           properties:
- *             archeosite:
- *               $ref: "#/components/schemas/ArcheologischeSite"
- *             wende:
- *               $ref: "#/components/schemas/Wende"
+ *             siteId:
+ *               type: integer
+ *             wendeId:
+ *               type: integer
+ *               nullable: true
  *             naam:
  *               type: string
  *             beschrijving:
@@ -56,9 +61,21 @@ import { requireAuthentication } from '../core/auth';
  *               type: number
  *               minimum: -180
  *               maximum: 180
+ *             site:
+ *               $ref: "#/components/schemas/ArcheologischeSite"
+ *             createdBy:
+ *               type: integer
+ *             isPublic:
+ *               type: boolean
  *           example:
  *             id: 1
- *             archeosite:
+ *             siteId: 1
+ *             wendeId: 1
+ *             naam: "Heel Stone"
+ *             beschrijving: "Megaliet in lijn met de zonsopgang tijdens de zomerzonnewende."
+ *             breedtegraad: 51.179085
+ *             lengtegraad: -1.825797
+ *             site:
  *               id: 1
  *               naam: "Stonehenge"
  *               land: "Engeland"
@@ -74,10 +91,8 @@ import { requireAuthentication } from '../core/auth';
  *               astronomischEvent: OPGANG
  *               datumTijd: "2023-06-21T04:52:00Z"
  *               azimuthoek: 51.3
- *             naam: "Heel Stone"
- *             beschrijving: "Megaliet in lijn met de zonsopgang tijdens de zomerzonnewende."
- *             breedtegraad: 51.179085
- *             lengtegraad: -1.825797
+ *             createdBy: 1
+ *             isPublic: false
  *     MarkerList:
  *       required:
  *         - items
@@ -86,39 +101,88 @@ import { requireAuthentication } from '../core/auth';
  *           type: array
  *           items:
  *             $ref: "#/components/schemas/Marker"
- *
- *   requestBodies:
- *     Marker:
- *       description: The marker info to save
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               archeosite:
- *                 $ref: "#/components/schemas/ArcheologischeSite"
- *               wende:
- *                 $ref: "#/components/schemas/Wende"
- *               naam:
- *                 type: string
- *               beschrijving:
- *                 type: string
- *                 nullable: true
- *               breedtegraad:
- *                 type: number
- *                 minimum: -90
- *                 maximum: 90
- *               lengtegraad:
- *                 type: number
- *                 minimum: -180
- *                 maximum: 180
- *             required:
- *               - archeosite
- *               - naam
- *               - breedtegraad
- *               - lengtegraad
+ *     MarkerCreateRequest:
+ *       type: object
+ *       required:
+ *         - siteId
+ *         - naam
+ *         - breedtegraad
+ *         - lengtegraad
+ *       properties:
+ *         siteId:
+ *           type: integer
+ *         wendeId:
+ *           type: integer
+ *           nullable: true
+ *         naam:
+ *           type: string
+ *         beschrijving:
+ *           type: string
+ *           nullable: true
+ *         breedtegraad:
+ *           type: number
+ *           minimum: -90
+ *           maximum: 90
+ *         lengtegraad:
+ *           type: number
+ *           minimum: -180
+ *           maximum: 180
+ *       example:
+ *         siteId: 1
+ *         wendeId: 1
+ *         naam: "Heel Stone"
+ *         beschrijving: "Megaliet in lijn met de zonsopgang tijdens de zomerzonnewende."
+ *         breedtegraad: 51.179085
+ *         lengtegraad: -1.825797
+ *     MarkerUpdateRequest:
+ *       type: object
+ *       properties:
+ *         siteId:
+ *           type: integer
+ *         wendeId:
+ *           type: integer
+ *           nullable: true
+ *         naam:
+ *           type: string
+ *         beschrijving:
+ *           type: string
+ *           nullable: true
+ *         breedtegraad:
+ *           type: number
+ *           minimum: -90
+ *           maximum: 90
+ *         lengtegraad:
+ *           type: number
+ *           minimum: -180
+ *           maximum: 180
+ *         isPublic:
+ *           type: boolean
+ *           description: Whether the marker is publicly accessible (admin only)
+ *       example:
+ *         naam: "Updated Heel Stone"
+ *         beschrijving: "Updated description."
+ *         isPublic: true
  */
+
+const checkMarkerAccess = async (ctx: KoaContext<unknown, IdParams>, next: Next) => {
+  const { userId, roles } = ctx.state.session;
+  const { id } = ctx.params;
+
+  if (roles.includes(Role.ADMIN)) {
+    return next();
+  }
+
+  const marker = await markerService.getById(Number(id), userId, false);
+  if (!marker) {
+    return ctx.throw(404, 'Er is geen marker met dit id.', { code: 'NOT_FOUND' });
+  }
+
+  if (marker.createdBy === userId || marker.isPublic) {
+    return next();
+  }
+
+  return ctx.throw(403, 'Je hebt geen toegang tot deze marker.', { code: 'FORBIDDEN' });
+};
 
 /**
  * @swagger
@@ -142,10 +206,9 @@ import { requireAuthentication } from '../core/auth';
  *         $ref: '#/components/responses/401Unauthorized'
  */
 const getAllMarkers = async (ctx: KoaContext<GetAllMarkersResponse>) =>{
-  const wendes = await markerService.getAll();
-  ctx.body = {
-    items: wendes,
-  };      
+  const { userId, roles } = ctx.state.session;
+  const markers = await markerService.getAll(userId, roles.includes(Role.ADMIN));
+  ctx.body = { items: markers };      
 };
 getAllMarkers.validationScheme = null;
 
@@ -171,11 +234,14 @@ getAllMarkers.validationScheme = null;
  *         $ref: '#/components/responses/400BadRequest'
  *       401:
  *         $ref: '#/components/responses/401Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/403Forbidden'
  *       404:
  *         $ref: '#/components/responses/404NotFound'
  */
 const getMarkerById = async (ctx: KoaContext<GetMarkerByIdResponse, IdParams>)=>{
-  const marker = await markerService.getById(ctx.params.id);
+  const { userId, roles } = ctx.state.session;
+  const marker = await markerService.getById(ctx.params.id, userId, roles.includes(Role.ADMIN));
   ctx.body = marker;
 };
 getMarkerById.validationScheme = {
@@ -195,9 +261,14 @@ getMarkerById.validationScheme = {
  *     security:
  *       - bearerAuth: []
  *     requestBody:
- *       $ref: "#/components/requestBodies/Marker"
+ *       description: The marker info to save
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: "#/components/schemas/MarkerCreateRequest"
  *     responses:
- *       200:
+ *       201:
  *         description: The created marker
  *         content:
  *           application/json:
@@ -213,14 +284,15 @@ getMarkerById.validationScheme = {
 const createMarker = async (
   ctx: KoaContext<CreateMarkerResponse, void, CreateMarkerRequest>,
 ) =>{
-  const newMarker = await markerService.create(ctx.request.body!);
+  const { userId } = ctx.state.session;
+  const newMarker = await markerService.create(ctx.request.body, userId);
   ctx.status = 201;  
   ctx.body = newMarker;
 };
 createMarker.validationScheme = {
   body: {
     siteId: Joi.number().integer().positive(),
-    wendeId: Joi.number().integer().positive(),
+    wendeId: Joi.number().integer().positive().allow(null),
     naam: Joi.string().max(255),
     beschrijving: Joi.optional().allow(null),
     breedtegraad: Joi.number()
@@ -246,7 +318,12 @@ createMarker.validationScheme = {
  *     parameters:
  *       - $ref: "#/components/parameters/idParam"
  *     requestBody:
- *       $ref: "#/components/requestBodies/Marker"
+ *       description: The marker info to update
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: "#/components/schemas/MarkerUpdateRequest"
  *     responses:
  *       200:
  *         description: The updated marker
@@ -258,13 +335,21 @@ createMarker.validationScheme = {
  *         $ref: '#/components/responses/400BadRequest'
  *       401:
  *         $ref: '#/components/responses/401Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/403Forbidden'
  *       404:
  *         $ref: '#/components/responses/404NotFound'
  */
 const updateMarker = async (
   ctx: KoaContext<UpdateMarkerResponse, IdParams, UpdateMarkerRequest>,
 )=>{
-  const marker = await markerService.updateById(Number(ctx.params.id), ctx.request.body!);
+  const { userId, roles } = ctx.state.session;
+  const marker = await markerService.updateById(
+    Number(ctx.params.id), 
+    ctx.request.body,
+    userId,
+    roles.includes(Role.ADMIN),
+  );
   ctx.body = marker;
 };
 updateMarker.validationScheme = {
@@ -273,7 +358,7 @@ updateMarker.validationScheme = {
   },
   body: {
     siteId: Joi.number().optional().integer().positive(),
-    wendeId: Joi.number().optional().integer().positive(),
+    wendeId: Joi.number().optional().integer().positive().allow(null),
     naam: Joi.string().optional().max(255),
     beschrijving: Joi.optional().allow(null),
     breedtegraad: Joi.number()
@@ -286,6 +371,7 @@ updateMarker.validationScheme = {
       .precision(8)
       .min(-180)
       .max(180),
+    isPublic: Joi.boolean().optional(), 
   }, 
 };
 
@@ -307,11 +393,14 @@ updateMarker.validationScheme = {
  *         $ref: '#/components/responses/400BadRequest'
  *       401:
  *         $ref: '#/components/responses/401Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/403Forbidden'
  *       404:
  *         $ref: '#/components/responses/404NotFound'
  */
 const deleteMarker = async (ctx: KoaContext<void, IdParams>)=>{
-  await markerService.deleteById(Number(ctx.params.id));
+  const { userId, roles } = ctx.state.session;
+  await markerService.deleteById(Number(ctx.params.id), userId, roles.includes(Role.ADMIN));
   ctx.status = 204;
 };
 deleteMarker.validationScheme = {
@@ -320,13 +409,45 @@ deleteMarker.validationScheme = {
   },
 };
 
+/**
+ * @swagger
+ * /api/markers/{siteId}/archeosites:
+ *   get:
+ *     summary: Get all markers for a specific archeological site
+ *     tags:
+ *       - Markers
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: siteId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the archeological site
+ *     responses:
+ *       200:
+ *         description: List of markers for the specified site
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/MarkerList"
+ *       400:
+ *         $ref: '#/components/responses/400BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/401Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/404NotFound'
+ */
 const getMarkersBySiteId = async (ctx: KoaContext<GetAllMarkersResponse, IdParams>)=>{
-  const archeosites = await archeositeService.getMarkersBySiteId(
-    Number(ctx.params.id),
-  );
-  ctx.body = {
-    items: archeosites,
-  };
+  const { userId, roles } = ctx.state.session;
+  const markers = await archeositeService.getMarkersBySiteId(Number(ctx.params.id), userId, roles.includes(Role.ADMIN));
+  ctx.body = { items: markers };
+};
+getMarkersBySiteId.validationScheme = {
+  params: {
+    id: Joi.number().integer().positive().required(),
+  },
 };
 
 export default (parent: KoaRouter) => {
@@ -339,16 +460,17 @@ export default (parent: KoaRouter) => {
   router.get('/', validate(getAllMarkers.validationScheme),
     getAllMarkers);
   router.get('/:id', validate(getMarkerById.validationScheme),
+    checkMarkerAccess,
     getMarkerById);
   router.post('/', validate(createMarker.validationScheme),
     createMarker);
   router.put('/:id', validate(updateMarker.validationScheme),
+    checkMarkerAccess,
     updateMarker);
   router.delete('/:id', validate(deleteMarker.validationScheme),
+    checkMarkerAccess,
     deleteMarker);
-  
-  // GET /api/markers/:siteId/archeosites
-  router.get('/:id/archeosites', getMarkersBySiteId);
+  router.get('/:id/archeosites', validate(getMarkersBySiteId.validationScheme), getMarkersBySiteId);
 
   parent.use(router.routes())
     .use(router.allowedMethods());

@@ -9,14 +9,16 @@ import testAuthHeader from '../helpers/testAuthHeader';
 const data = {
   archeosites: [
     {
-      id:1,
+      id: 1,
       naam: 'test naam 1',
       land: 'test land 1',
       beschrijving: 'test beschrijving 1',
       breedtegraad: new Prisma.Decimal('51.2'),
       lengtegraad: new Prisma.Decimal('-1.8'),
-      hoogte: new Prisma.Decimal('100.5'),
+      hoogte: 100,
       foto: '/images/testimage1.jpg',
+      createdBy: 1,
+      isPublic: true,
     },{
       id: 2,
       naam: 'test naam 2',
@@ -24,8 +26,10 @@ const data = {
       beschrijving: 'test beschrijving 2',
       breedtegraad: new Prisma.Decimal('50.5'),
       lengtegraad: new Prisma.Decimal('0.1'),
-      hoogte: new Prisma.Decimal('0'),
+      hoogte: 0,
       foto: '/images/testimage2.jpg',
+      createdBy: 1,
+      isPublic: true,
     }],
   wendes: [{
     id:1,
@@ -34,6 +38,9 @@ const data = {
     astronomischEvent: AstronomischEvent.OPGANG,
     datumTijd: new Date(2023, 5, 21, 4, 52),
     azimuthoek: new Prisma.Decimal('50.0'),
+    calculatedBy: 'PhotoEphemerisApp',
+    createdBy: 1,
+    isPublic: true,
   },{
     id: 2,
     siteId: 1,
@@ -41,6 +48,9 @@ const data = {
     astronomischEvent: AstronomischEvent.OPGANG,
     datumTijd: new Date(2023, 11, 22, 8, 9),
     azimuthoek: new Prisma.Decimal('128.0'),
+    calculatedBy: 'PhotoEphemerisApp',
+    createdBy: 1,
+    isPublic: true,
   }, {
     id: 3,
     siteId: 2,
@@ -48,6 +58,9 @@ const data = {
     astronomischEvent: AstronomischEvent.OPGANG,
     datumTijd: new Date(2023, 11, 21, 8, 58),
     azimuthoek: new Prisma.Decimal('134.0'),
+    calculatedBy: 'PhotoEphemerisApp',
+    createdBy: 1,
+    isPublic: true,
   }],
   markers: [{
     id:1,
@@ -57,6 +70,8 @@ const data = {
     beschrijving: 'test marker beschrijving 1',
     breedtegraad: new Prisma.Decimal('51.18'),
     lengtegraad: new Prisma.Decimal('-1.82'),
+    createdBy: 1,
+    isPublic: true,
   }, {
     id:2,
     siteId: 2,
@@ -65,6 +80,8 @@ const data = {
     beschrijving: 'test marker beschrijving 2',
     breedtegraad: new Prisma.Decimal('53.7'),
     lengtegraad: new Prisma.Decimal('-6.48'),
+    createdBy: 1,
+    isPublic: true,
   }],
 };
 const dataToDelete ={
@@ -116,14 +133,16 @@ describe('Archeosites', () => {
       expect(response.body.items).toEqual(
         expect.arrayContaining([
           {
-            id:1,
+            id: 1,
             naam: 'test naam 1',
             land: 'test land 1',
             beschrijving: 'test beschrijving 1',
             breedtegraad: '51.2',
             lengtegraad: '-1.8',
-            hoogte: '100.5',
+            hoogte: 100,
             foto: '/images/testimage1.jpg',
+            createdBy: 1,
+            isPublic: true,
           },{
             id: 2,
             naam: 'test naam 2',
@@ -131,8 +150,10 @@ describe('Archeosites', () => {
             beschrijving: 'test beschrijving 2',
             breedtegraad: '50.5',
             lengtegraad: '0.1',
-            hoogte: '0',
+            hoogte: 0,
             foto: '/images/testimage2.jpg',
+            createdBy: 1,
+            isPublic: true,
           },
         ]),
       );
@@ -178,8 +199,10 @@ describe('Archeosites', () => {
         beschrijving: 'test beschrijving 1',
         breedtegraad: '51.2',
         lengtegraad: '-1.8',
-        hoogte: '100.5',
+        hoogte: 100,
         foto: '/images/testimage1.jpg',
+        createdBy: 1,
+        isPublic: true,
         orientatieMarkers: [{
           id:1,
           wendeId: 1,
@@ -187,6 +210,8 @@ describe('Archeosites', () => {
           beschrijving: 'test marker beschrijving 1',
           breedtegraad: '51.18',
           lengtegraad: '-1.82',
+          createdBy: 1,
+          isPublic: true,
         }],
         wendes: [{
           id:1,
@@ -194,12 +219,18 @@ describe('Archeosites', () => {
           astronomischEvent: AstronomischEvent.OPGANG,
           datumTijd: '2023-06-21T02:52:00.000Z',
           azimuthoek: '50',
+          calculatedBy: 'PhotoEphemerisApp',
+          createdBy: 1,
+          isPublic: true,
         },{
           id: 2,
           wendeType: WendeType.WINTERZONNEWENDE,
           astronomischEvent: AstronomischEvent.OPGANG,
           datumTijd: '2023-12-22T07:09:00.000Z',
           azimuthoek: '128',
+          calculatedBy: 'PhotoEphemerisApp',
+          createdBy: 1,
+          isPublic: true,
         }],
       });
     });
@@ -224,8 +255,10 @@ describe('Archeosites', () => {
           beschrijving: 'test beschrijving',
           breedtegraad: '50.2',
           lengtegraad: '-12.8',
-          hoogte: '10.5',
+          hoogte: 10,
           foto: '/images/testimage.jpg',
+          createdBy: 1,
+          isPublic: true,
         });
 
       expect(response.status).toBe(201);
@@ -235,7 +268,7 @@ describe('Archeosites', () => {
       expect(response.body.beschrijving).toBe('test beschrijving');
       expect(response.body.breedtegraad).toBe('50.2');
       expect(response.body.lengtegraad).toBe('-12.8');
-      expect(response.body.hoogte).toBe('10.5');
+      expect(response.body.hoogte).toBe(10);
       expect(response.body.foto).toBe('/images/testimage.jpg');
 
       archeositesToDelete.push(response.body.id);

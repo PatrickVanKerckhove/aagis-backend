@@ -15,6 +15,8 @@ import type { IdParams } from '../types/common';
 import Joi from 'joi';
 import validate from '../core/validation';
 import { requireAuthentication } from '../core/auth';
+import Role from '../core/roles';
+import type { Next } from 'koa';
 
 /**
  * @swagger
@@ -37,6 +39,8 @@ import { requireAuthentication } from '../core/auth';
  *             - land
  *             - breedtegraad
  *             - lengtegraad
+ *             - createdBy
+ *             - isPublic
  *           properties:
  *             naam:
  *               type: string
@@ -56,9 +60,17 @@ import { requireAuthentication } from '../core/auth';
  *             hoogte:
  *               type: number
  *               nullable: true
+ *               minimum: -999
+ *               maximum: 9999
  *             foto:
  *               type: string
  *               nullable: true
+ *             createdBy:
+ *               type: integer
+ *               description: ID of the user who created the site
+ *             isPublic:
+ *               type: boolean
+ *               description: Whether the site is publicly accessible
  *           example:
  *             id: 1
  *             naam: "Stonehenge"
@@ -66,8 +78,10 @@ import { requireAuthentication } from '../core/auth';
  *             beschrijving: "Prehistorisch monument in Wiltshire, Engeland, bekend om zijn astronomische uitlijningen."
  *             breedtegraad: 51.178883
  *             lengtegraad: -1.826204
- *             hoogte: 101.0
+ *             hoogte: 101
  *             foto: "/images/Stonehenge_800x600.jpg"
+ *             createdBy: 1
+ *             isPublic: true
  *     ArcheoSiteList:
  *       required:
  *         - items
@@ -77,38 +91,77 @@ import { requireAuthentication } from '../core/auth';
  *           items:
  *             $ref: "#/components/schemas/ArcheologischeSite"
  *
- *   requestBodies:
- *     ArcheologischeSite:
- *       description: The archeological site info to save
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               naam:
- *                 type: string
- *               land:
- *                 type: string
- *               beschrijving:
- *                 type: string
- *               breedtegraad:
- *                 type: number
- *                 minimum: -90
- *                 maximum: 90
- *               lengtegraad:
- *                 type: number
- *                 minimum: -180
- *                 maximum: 180
- *               hoogte:
- *                 type: number
- *               foto:
- *                 type: string
- *             required:
- *               - naam
- *               - land
- *               - breedtegraad
- *               - lengtegraad
+ *     ArcheoSiteCreateRequest:
+ *       type: object
+ *       required:
+ *         - naam
+ *         - land
+ *         - breedtegraad
+ *         - lengtegraad
+ *       properties:
+ *         naam:
+ *           type: string
+ *         land:
+ *           type: string
+ *         beschrijving:
+ *           type: string
+ *           nullable: true
+ *         breedtegraad:
+ *           type: number
+ *           minimum: -90
+ *           maximum: 90
+ *         lengtegraad:
+ *           type: number
+ *           minimum: -180
+ *           maximum: 180
+ *         hoogte:
+ *           type: number
+ *           nullable: true
+ *         foto:
+ *           type: string
+ *       example:
+ *         naam: "Stonehenge"
+ *         land: "Engeland"
+ *         beschrijving: "Prehistorisch monument in Wiltshire, Engeland."
+ *         breedtegraad: 51.178883
+ *         lengtegraad: -1.826204
+ *         hoogte: 101.0
+ *         foto: "/images/Stonehenge_800x600.jpg"  
+ *     ArcheoSiteUpdateRequest:
+ *       type: object
+ *       properties:
+ *         naam:
+ *           type: string
+ *           maxLength: 255
+ *         land:
+ *           type: string
+ *           maxLength: 255
+ *         beschrijving:
+ *           type: string
+ *           nullable: true
+ *         breedtegraad:
+ *           type: number
+ *           minimum: -90
+ *           maximum: 90
+ *         lengtegraad:
+ *           type: number
+ *           minimum: -180
+ *           maximum: 180
+ *         hoogte:
+ *           type: number
+ *           nullable: true
+ *           minimum: -999
+ *           maximum: 9999
+ *         foto:
+ *           type: string
+ *           nullable: true
+ *         isPublic:
+ *           type: boolean
+ *       example:  
+ *         naam: "Updated Stonehenge"
+ *         land: "Engeland"
+ *         beschrijving: "Updated description."
+ *         isPublic: true  
  */
 
 /**
@@ -134,7 +187,8 @@ import { requireAuthentication } from '../core/auth';
  */
 
 const getAllArcheosites = async (ctx: KoaContext<GetAllArcheoSitesResponse>) =>{
-  const archeosites = await archeositeService.getAll();
+  const { userId, roles } = ctx.state.session;
+  const archeosites = await archeositeService.getAll(userId, roles.includes(Role.ADMIN));
   ctx.body = {
     items: archeosites,
   };      
@@ -163,11 +217,34 @@ getAllArcheosites.validationScheme = null;
  *         $ref: '#/components/responses/400BadRequest'
  *       401:
  *         $ref: '#/components/responses/401Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/403Forbidden'
  *       404:
  *         $ref: '#/components/responses/404NotFound'
  */
+const checkArcheositeAccess = async (ctx: KoaContext<unknown, IdParams>, next: Next) => {
+  const { userId, roles } = ctx.state.session;
+  const { id } = ctx.params;
+
+  if (roles.includes(Role.ADMIN)) {
+    return next();
+  }
+
+  const archeosite = await archeositeService.getById(Number(id), userId, false);
+  if (!archeosite) {
+    return ctx.throw(404, 'Er is geen archeologische site met dit id.', { code: 'NOT_FOUND' });
+  }
+
+  if (archeosite.createdBy === userId || archeosite.isPublic) {
+    return next();
+  }
+
+  return ctx.throw(403, 'Je hebt geen toegang tot deze archeologische site.', { code: 'FORBIDDEN' });
+};
+
 const getArcheositeById = async (ctx: KoaContext<GetArcheoSiteByIdResponse, IdParams>)=>{
-  const archeosite = await archeositeService.getById(ctx.params.id);
+  const { userId, roles } = ctx.state.session;
+  const archeosite = await archeositeService.getById(ctx.params.id, userId, roles.includes(Role.ADMIN));
   ctx.body = archeosite;
 };
 getArcheositeById.validationScheme = {
@@ -187,7 +264,12 @@ getArcheositeById.validationScheme = {
  *     security:
  *       - bearerAuth: []
  *     requestBody:
- *       $ref: "#/components/requestBodies/ArcheologischeSite"
+ *       description: The archeological site info to save
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: "#/components/schemas/ArcheoSiteCreateRequest"
  *     responses:
  *       200:
  *         description: The created archeological site
@@ -205,7 +287,8 @@ getArcheositeById.validationScheme = {
 const createArcheosite = async (
   ctx: KoaContext<CreateArcheoSiteResponse, void, CreateArcheoSiteRequest>,
 ) =>{
-  const newArcheosite = await archeositeService.create(ctx.request.body!);
+  const { userId } = ctx.state.session;
+  const newArcheosite = await archeositeService.create(ctx.request.body, userId);
   ctx.status = 201;  
   ctx.body = newArcheosite;
 };
@@ -225,9 +308,8 @@ createArcheosite.validationScheme = {
     hoogte: Joi.number()
       .optional()
       .allow(null)
-      .precision(2)
-      .min(-999.99)
-      .max(9999.99),
+      .min(-999)
+      .max(9999),
     foto: Joi.string().optional().allow(null).max(255),
   },
 };
@@ -244,7 +326,12 @@ createArcheosite.validationScheme = {
  *     parameters:
  *       - $ref: "#/components/parameters/idParam"
  *     requestBody:
- *       $ref: "#/components/requestBodies/ArcheologischeSite"
+ *       description: The archeological site info to update
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: "#/components/schemas/ArcheoSiteUpdateRequest"
  *     responses:
  *       200:
  *         description: The updated archeological site
@@ -256,13 +343,21 @@ createArcheosite.validationScheme = {
  *         $ref: '#/components/responses/400BadRequest'
  *       401:
  *         $ref: '#/components/responses/401Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/403Forbidden'
  *       404:
  *         $ref: '#/components/responses/404NotFound'
  */
 const updateArcheosite = async (
   ctx: KoaContext<UpdateArcheoSiteResponse, IdParams, UpdateArcheoSiteRequest>,
 )=>{
-  const archeologischeSite = await archeositeService.updateById(Number(ctx.params.id), ctx.request.body!);
+  const { userId, roles } = ctx.state.session;
+  const archeologischeSite = await archeositeService.updateById(
+    Number(ctx.params.id), 
+    ctx.request.body,
+    userId,
+    roles.includes(Role.ADMIN),
+  );
   ctx.body = archeologischeSite;
 };
 updateArcheosite.validationScheme = {
@@ -286,10 +381,10 @@ updateArcheosite.validationScheme = {
     hoogte: Joi.number()
       .optional()
       .allow(null)
-      .precision(2)
-      .min(-999.99)
-      .max(9999.99),
+      .min(-999)
+      .max(9999),
     foto: Joi.string().optional().allow(null).max(255),
+    isPublic: Joi.boolean().optional(),
   },
 };
 
@@ -311,11 +406,14 @@ updateArcheosite.validationScheme = {
  *         $ref: '#/components/responses/400BadRequest'
  *       401:
  *         $ref: '#/components/responses/401Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/403Forbidden'
  *       404:
  *         $ref: '#/components/responses/404NotFound'
  */
 const deleteArcheosite = async (ctx: KoaContext<void, IdParams>)=>{
-  await archeositeService.deleteById(Number(ctx.params.id));
+  const { userId, roles } = ctx.state.session;
+  await archeositeService.deleteById(Number(ctx.params.id), userId, roles.includes(Role.ADMIN));
   ctx.status = 204;
 };
 deleteArcheosite.validationScheme = {
@@ -333,13 +431,13 @@ export default (parent: KoaRouter)=>{
   router.get('/', validate(getAllArcheosites.validationScheme),
     getAllArcheosites );
   router.get('/:id', validate(getArcheositeById.validationScheme), 
-    getArcheositeById );
+    checkArcheositeAccess, getArcheositeById );
   router.post('/', validate(createArcheosite.validationScheme),
     createArcheosite );
   router.put('/:id', validate(updateArcheosite.validationScheme),
-    updateArcheosite);
+    checkArcheositeAccess, updateArcheosite);
   router.delete('/:id', validate(deleteArcheosite.validationScheme),
-    deleteArcheosite);
+    checkArcheositeAccess, deleteArcheosite);
 
   // de archeosites router hangen onder parent
   parent

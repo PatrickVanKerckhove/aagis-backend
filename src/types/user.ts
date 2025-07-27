@@ -7,6 +7,8 @@ export interface User extends Entity{
   email: string;
   password_hash: string;
   roles: Prisma.JsonValue;
+  createdBy: null;
+  isPublic: null;
 }
 
 export interface PublicUser extends Pick<User, 'id' | 'naam' | 'email' > {}

@@ -17,6 +17,8 @@ import Joi from 'joi';
 import validate from '../core/validation';
 import { WendeType, AstronomischEvent } from '@prisma/client';
 import { requireAuthentication } from '../core/auth';
+import Role from '../core/roles';
+import type { Next } from 'koa';
 
 /**
  * @swagger
@@ -34,12 +36,18 @@ import { requireAuthentication } from '../core/auth';
  *         - $ref: "#/components/schemas/Base"
  *         - type: object
  *           required:
- *             - archeosite
+ *             - id
+ *             - siteId
  *             - wendeType
  *             - astronomischEvent
  *             - datumTijd
  *             - azimuthoek
+ *             - calculatedBy
+ *             - createdBy
+ *             - isPublic
  *           properties:
+ *             siteId:
+ *               type: integer
  *             archeosite:
  *               $ref: "#/components/schemas/ArcheologischeSite"
  *             wendeType:
@@ -67,8 +75,25 @@ import { requireAuthentication } from '../core/auth';
  *               minimum: 0
  *               maximum: 360
  *               description: Azimuth angle in degrees (0-360, North = 0° = 360°), clockwise
+ *             calculatedBy:
+ *               type: string
+ *               description: Tool which calculated the wende
+ *             createdBy:
+ *               type: integer
+ *               description: ID of the user who created the wende
+ *             isPublic:
+ *               type: boolean
+ *               description: Whether the wende is publicly accessible
  *           example:
  *             id: 1
+ *             siteId: 1
+ *             wendeType: ZOMERZONNEWENDE
+ *             astronomischEvent: OPGANG
+ *             datumTijd: "2023-06-21T04:52:00Z"
+ *             azimuthoek: 51.3
+ *             calculatedBy: "PhotoEphemerisApp"
+ *             createdBy: 1
+ *             isPublic: true
  *             archeosite:
  *               id: 1
  *               naam: "Stonehenge"
@@ -76,12 +101,8 @@ import { requireAuthentication } from '../core/auth';
  *               beschrijving: "Prehistorisch monument in Wiltshire, Engeland."
  *               breedtegraad: 51.178883
  *               lengtegraad: -1.826204
- *               hoogte: 101.0
+ *               hoogte: 101
  *               foto: "/images/Stonehenge_800x600.jpg"
- *             wendeType: ZOMERZONNEWENDE
- *             astronomischEvent: OPGANG
- *             datumTijd: "2023-06-21T04:52:00Z"
- *             azimuthoek: 51.3
  *     WendeList:
  *       required:
  *         - items
@@ -90,49 +111,86 @@ import { requireAuthentication } from '../core/auth';
  *           type: array
  *           items:
  *             $ref: "#/components/schemas/Wende"
- *
- *   requestBodies:
- *     Wende:
- *       description: The wende info to save
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               archeosite:
- *                 $ref: "#/components/schemas/ArcheologischeSite"
- *               wendeType:
- *                 type: string
- *                 enum:
- *                   - ZOMERZONNEWENDE
- *                   - WINTERZONNEWENDE
- *                   - NOORDGROTEMAANWENDE
- *                   - NOORDKLEINEMAANWENDE
- *                   - ZUIDGROTEMAANWENDE
- *                   - ZUIDKLEINEMAANWENDE
- *                 description: Type of the wende
- *               astronomischEvent:
- *                 type: string
- *                 enum:
- *                   - OPGANG
- *                   - ONDERGANG
- *                 description: Astronomical event (rise or set)
- *               datumTijd:
- *                 type: string
- *                 format: date-time
- *                 description: Date and time of the wende in ISO 8601 format
- *               azimuthoek:
- *                 type: number
- *                 minimum: 0
- *                 maximum: 360
- *                 description: Azimuth angle in degrees (0-360)
- *             required:
- *               - archeosite
- *               - wendeType
- *               - astronomischEvent
- *               - datumTijd
- *               - azimuthoek
+ *     WendeCreateRequest:
+ *       type: object
+ *       required:
+ *         - siteId
+ *         - wendeType
+ *         - astronomischEvent
+ *         - datumTijd
+ *         - azimuthoek
+ *         - calculatedBy
+ *       properties:
+ *         siteId:
+ *           type: integer
+ *         wendeType:
+ *           type: string
+ *           enum:
+ *             - ZOMERZONNEWENDE
+ *             - WINTERZONNEWENDE
+ *             - NOORDGROTEMAANWENDE
+ *             - NOORDKLEINEMAANWENDE
+ *             - ZUIDGROTEMAANWENDE
+ *             - ZUIDKLEINEMAANWENDE
+ *           description: Type of the wende
+ *         astronomischEvent:
+ *           type: string
+ *           enum:
+ *             - OPGANG
+ *             - ONDERGANG
+ *           description: Astronomical event (rise or set)
+ *         datumTijd:
+ *           type: string
+ *           format: date-time
+ *         azimuthoek:
+ *           type: number
+ *           minimum: 0
+ *           maximum: 360
+ *           description: Azimuth angle in degrees (0-360)
+ *         calculatedBy:
+ *           type: string 
+ *       example:
+ *         siteId: 1
+ *         wendeType: ZOMERZONNEWENDE
+ *         astronomischEvent: OPGANG
+ *         datumTijd: "2025-06-21T04:52:00Z"
+ *         azimuthoek: 51.3
+ *         calculatedBy: "PhotoEphemerisApp"
+ *     WendeUpdateRequest:
+ *       type: object
+ *       properties:
+ *         siteId:
+ *           type: integer
+ *         wendeType:
+ *           type: string
+ *           enum:
+ *             - ZOMERZONNEWENDE
+ *             - WINTERZONNEWENDE
+ *             - NOORDGROTEMAANWENDE
+ *             - NOORDKLEINEMAANWENDE
+ *             - ZUIDGROTEMAANWENDE
+ *             - ZUIDKLEINEMAANWENDE
+ *         astronomischEvent:
+ *           type: string
+ *           enum: 
+ *             - OPGANG
+ *             - ONDERGANG
+ *         datumTijd:
+ *           type: string
+ *           format: date-time
+ *         azimuthoek:
+ *           type: number
+ *           minimum: 0
+ *           maximum: 360
+ *         calculatedBy:
+ *           type: string
+ *         isPublic:
+ *           type: boolean
+ *           description: Whether the wende is publicly accessible (admin only)
+ *       example:
+ *         wendeType: WINTERZONNEWENDE
+ *         azimuthoek: 230.5
+ *         isPublic: true    
  */
 
 /**
@@ -157,7 +215,8 @@ import { requireAuthentication } from '../core/auth';
  *         $ref: '#/components/responses/401Unauthorized'
  */
 const getAllWendes = async (ctx: KoaContext<GetAllWendesResponse>) =>{
-  const wendes = await wendeService.getAll();
+  const { userId, roles } = ctx.state.session;
+  const wendes = await wendeService.getAll(userId, roles.includes(Role.ADMIN));
   ctx.body = {
     items: wendes,
   };      
@@ -186,11 +245,34 @@ getAllWendes.validationScheme = null;
  *         $ref: '#/components/responses/400BadRequest'
  *       401:
  *         $ref: '#/components/responses/401Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/403Forbidden'
  *       404:
  *         $ref: '#/components/responses/404NotFound'
  */
+const checkWendeAccess = async (ctx: KoaContext<unknown, IdParams>, next: Next) => {
+  const { userId, roles } = ctx.state.session;
+  const { id } = ctx.params;
+
+  if (roles.includes(Role.ADMIN)) {
+    return next();
+  }
+
+  const wende = await wendeService.getById(Number(id), userId, false);
+  if (!wende) {
+    return ctx.throw(404, 'Er is geen wende met dit id.', { code: 'NOT_FOUND' });
+  }
+
+  if (wende.createdBy === userId || wende.isPublic) {
+    return next();
+  }
+
+  return ctx.throw(403, 'Je hebt geen toegang tot deze wende.', { code: 'FORBIDDEN' });
+};
+
 const getWendeById = async (ctx: KoaContext<GetWendeByIdResponse, IdParams>)=>{
-  const wende = await wendeService.getById(ctx.params.id);
+  const { userId, roles } = ctx.state.session;
+  const wende = await wendeService.getById(ctx.params.id, userId, roles.includes(Role.ADMIN));
   ctx.body = wende;
 };
 getWendeById.validationScheme = {
@@ -210,7 +292,12 @@ getWendeById.validationScheme = {
  *     security:
  *       - bearerAuth: []
  *     requestBody:
- *       $ref: "#/components/requestBodies/Wende"
+ *       description: The wende info to save
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: "#/components/schemas/WendeCreateRequest"
  *     responses:
  *       200:
  *         description: The created wende
@@ -228,7 +315,8 @@ getWendeById.validationScheme = {
 const createWende = async (
   ctx: KoaContext<CreateWendeResponse, void, CreateWendeRequest>,
 ) =>{
-  const newWende = await wendeService.create(ctx.request.body!);
+  const { userId } = ctx.state.session;
+  const newWende = await wendeService.create(ctx.request.body, userId);
   ctx.status = 201;  
   ctx.body = newWende;
 };
@@ -242,6 +330,7 @@ createWende.validationScheme = {
       .precision(2)
       .min(0)
       .max(360),
+    calculatedBy: Joi.string().max(255),  
   },
 };
 
@@ -257,7 +346,12 @@ createWende.validationScheme = {
  *     parameters:
  *       - $ref: "#/components/parameters/idParam"
  *     requestBody:
- *       $ref: "#/components/requestBodies/Wende"
+ *       description: The wende info to update
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: "#/components/schemas/WendeUpdateRequest"
  *     responses:
  *       200:
  *         description: The updated wende
@@ -269,13 +363,21 @@ createWende.validationScheme = {
  *         $ref: '#/components/responses/400BadRequest'
  *       401:
  *         $ref: '#/components/responses/401Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/403Forbidden'
  *       404:
  *         $ref: '#/components/responses/404NotFound'
  */
 const updateWende = async (
   ctx: KoaContext<UpdateWendeResponse, IdParams, UpdateWendeRequest>,
 )=>{
-  const wende = await wendeService.updateById(Number(ctx.params.id), ctx.request.body!);
+  const { userId, roles } = ctx.state.session;
+  const wende = await wendeService.updateById(
+    Number(ctx.params.id), 
+    ctx.request.body,
+    userId,
+    roles.includes(Role.ADMIN),
+  );
   ctx.body = wende;
 };
 updateWende.validationScheme = {
@@ -292,6 +394,8 @@ updateWende.validationScheme = {
       .precision(2)
       .min(0)
       .max(360),
+    calculatedBy: Joi.string().max(255).optional(),
+    isPublic: Joi.boolean().optional(),  
   },
 };
 
@@ -313,11 +417,14 @@ updateWende.validationScheme = {
  *         $ref: '#/components/responses/400BadRequest'
  *       401:
  *         $ref: '#/components/responses/401Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/403Forbidden'
  *       404:
  *         $ref: '#/components/responses/404NotFound'
  */
 const deleteWende = async (ctx: KoaContext<void, IdParams>)=>{
-  await wendeService.deleteById(Number(ctx.params.id));
+  const { userId, roles } = ctx.state.session;
+  await wendeService.deleteById(Number(ctx.params.id), userId, roles.includes(Role.ADMIN));
   ctx.status = 204;
 };
 deleteWende.validationScheme = {
@@ -327,8 +434,10 @@ deleteWende.validationScheme = {
 };
 
 const getWendesBySiteId = async (ctx: KoaContext<GetAllWendesResponse, IdParams>)=>{
+  const { userId, roles } = ctx.state.session;
   const archeosites = await archeositeService.getWendesBySiteId(
-    Number(ctx.params.id),
+    Number(ctx.params.id), userId, roles.includes(Role.ADMIN),
+
   );
   ctx.body = {
     items: archeosites,
@@ -345,13 +454,13 @@ export default (parent: KoaRouter) => {
   router.get('/', validate(getAllWendes.validationScheme),
     getAllWendes);
   router.get('/:id', validate(getWendeById.validationScheme),
-    getWendeById);
+    checkWendeAccess, getWendeById);
   router.post('/', validate(createWende.validationScheme),
     createWende);
   router.put('/:id', validate(updateWende.validationScheme),
-    updateWende);
+    checkWendeAccess,updateWende);
   router.delete('/:id', validate(deleteWende.validationScheme),
-    deleteWende);
+    checkWendeAccess, deleteWende);
 
   // GET /api/wendes/:siteId/archeosites
   router.get('/:id/archeosites', getWendesBySiteId);

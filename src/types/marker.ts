@@ -2,6 +2,7 @@
 import type { ArcheologischeSite } from './archeosite';
 import type { Entity, ListResponse } from './common';
 import type { Decimal } from '@prisma/client/runtime/library';
+
 export interface OrientatieMarker extends Entity{
   siteId: number;
   wendeId: number | null;
@@ -10,9 +11,11 @@ export interface OrientatieMarker extends Entity{
   breedtegraad: Decimal;
   lengtegraad: Decimal;
   site?: ArcheologischeSite;
+  createdBy: number;
+  isPublic: boolean;
 }
 
-export interface MarkerCreateInput{
+export interface CreateMarkerRequest{
   siteId: number;
   wendeId: number | null;
   naam: string;
@@ -21,10 +24,16 @@ export interface MarkerCreateInput{
   lengtegraad: Decimal;
 }
 
-export interface MarkerUpdateInput extends MarkerCreateInput{}
+export interface MarkerCreateInput extends CreateMarkerRequest {
+  createdBy: number;
+  isPublic?: boolean;
+}
 
-export interface CreateMarkerRequest extends MarkerCreateInput{}
-export interface UpdateMarkerRequest extends MarkerCreateInput{}
+export interface MarkerUpdateInput extends Partial<CreateMarkerRequest> {
+  isPublic?: boolean;
+}
+
+export interface UpdateMarkerRequest extends MarkerUpdateInput{}
 
 export interface GetAllMarkersResponse extends ListResponse<OrientatieMarker>{}
 export interface GetMarkerByIdResponse extends OrientatieMarker {}

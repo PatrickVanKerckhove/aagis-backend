@@ -8,15 +8,18 @@ datasource db {
 }
 model OrientatieMarker{
   @@map("markers")         // Set the table name to "markers"
-  id           Int         @id @default(autoincrement()) @db.UnsignedInt
-  siteId       Int         @db.UnsignedInt
-  site         ArcheologischeSite  @relation("SiteToMarkers", fields: [siteId], references: [id], onDelete: Cascade, map: "fk_marker_site")       
-  wendeId      Int?        @db.UnsignedInt // Optioneel
-  wende        Wende?      @relation("WendeToMarkers", fields: [wendeId], references: [id], onDelete: Cascade, map:"fk_marker_wende")
-  naam         String      @unique(map: "idx_marker_naam_unique") @db.VarChar(255)
-  beschrijving String?     @db.Text
-  breedtegraad Decimal     @db.Decimal(10, 8) //10 cijfers in totaal, 8 na komma
-  lengtegraad  Decimal     @db.Decimal(11, 8)
+  id            Int         @id @default(autoincrement()) @db.UnsignedInt
+  siteId        Int         @db.UnsignedInt
+  site          ArcheologischeSite  @relation("SiteToMarkers", fields: [siteId], references: [id], onDelete: Cascade, map: "fk_marker_site")       
+  wendeId       Int?        @db.UnsignedInt // Optioneel
+  wende         Wende?      @relation("WendeToMarkers", fields: [wendeId], references: [id], onDelete: Cascade, map:"fk_marker_wende")
+  naam          String      @unique(map: "idx_marker_naam_unique") @db.VarChar(255)
+  beschrijving  String?     @db.Text
+  breedtegraad  Decimal     @db.Decimal(10, 8) //10 cijfers in totaal, 8 na komma
+  lengtegraad   Decimal     @db.Decimal(11, 8)
+  createdBy     Int         @db.UnsignedInt
+  isPublic      Boolean     @default(false)
+  createdByUser User        @relation(fields: [createdBy], references: [id], name: "MarkerCreatedBy")
 }
 model Wende {
   @@map("wendes")         // Set the table name to "wendes"
@@ -27,28 +30,40 @@ model Wende {
   astronomischEvent AstronomischEvent
   datumTijd         DateTime           @db.DateTime(0)
   azimuthoek        Decimal            @db.Decimal(6, 2)
+  calculatedBy      String             @db.VarChar(255)
   orientatieMarkers OrientatieMarker[] @relation("WendeToMarkers")
+  createdBy     Int                    @db.UnsignedInt
+  isPublic      Boolean                @default(false)
+  createdByUser User                   @relation(fields: [createdBy], references: [id], name: "WendeCreatedBy")
 }
 model ArcheologischeSite{
   @@map("archeosites")     // Set the table name to "archeosites"
-  id           Int         @id @default(autoincrement()) @db.UnsignedInt
-  naam         String      @unique(map: "idx_archeosite_naam_unique") @db.VarChar(255)
-  land         String      @db.VarChar(255)
-  beschrijving String?     @db.Text
-  breedtegraad Decimal     @db.Decimal(10, 8) //10 cijfers in totaal, 8 na komma
-  lengtegraad  Decimal     @db.Decimal(11, 8)
-  hoogte       Decimal?    @db.Decimal(6, 2)
-  foto         String?     @db.VarChar(255)
+  id            Int         @id @default(autoincrement()) @db.UnsignedInt
+  naam          String      @unique(map: "idx_archeosite_naam_unique") @db.VarChar(255)
+  land          String      @db.VarChar(255)
+  beschrijving  String?     @db.Text
+  breedtegraad  Decimal     @db.Decimal(10, 8) //10 cijfers in totaal, 8 na komma
+  lengtegraad   Decimal     @db.Decimal(11, 8)
+  hoogte        Int?
+  foto          String?     @db.VarChar(255)
+  createdBy     Int         @db.UnsignedInt
+  isPublic      Boolean     @default(false)
+  createdByUser User        @relation(fields: [createdBy], references: [id], name: "ArcheoSiteCreatedBy")
   orientatieMarkers  OrientatieMarker[]  @relation("SiteToMarkers")
   wendes             Wende[]             @relation("SiteToWendes")
 }
 model User{
   @@map("users")
-  id            Int     @id @default(autoincrement()) @db.UnsignedInt
-  naam          String  @db.VarChar(255)
-  email         String  @unique(map: "idx_user_email_unique") @db.VarChar(255)
-  password_hash String  @db.VarChar(255)
+  id            Int      @id @default(autoincrement()) @db.UnsignedInt
+  naam          String   @db.VarChar(255)
+  email         String   @unique(map: "idx_user_email_unique") @db.VarChar(255)
+  password_hash String   @db.VarChar(255)
   roles         Json
+  createdBy     Int?     @db.UnsignedInt
+  isPublic      Boolean? @default(false)
+  createdArcheoSites ArcheologischeSite[] @relation("ArcheoSiteCreatedBy")
+  createdWendes Wende[] @relation("WendeCreatedBy")
+  createdMarkers OrientatieMarker[] @relation("MarkerCreatedBy")
 }
 enum WendeType {
   ZOMERZONNEWENDE

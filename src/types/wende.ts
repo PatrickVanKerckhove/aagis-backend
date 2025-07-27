@@ -9,20 +9,30 @@ export interface Wende extends Entity{
   astronomischEvent: AstronomischEvent;
   datumTijd: Date;
   azimuthoek: Decimal;
+  calculatedBy: string;
+  createdBy: number;
+  isPublic: boolean;
 }
 
-export interface WendeCreateInput{
+export interface CreateWendeRequest{
   siteId: number;
   wendeType: WendeType;
   astronomischEvent: AstronomischEvent;
   datumTijd: Date;
   azimuthoek: Decimal;
+  calculatedBy: string;
 }
 
-export interface WendeUpdateInput extends WendeCreateInput{}
+export interface WendeCreateInput extends CreateWendeRequest{
+  createdBy: number;
+  isPublic?: boolean;
+}
 
-export interface CreateWendeRequest extends WendeCreateInput{}
-export interface UpdateWendeRequest extends WendeCreateInput{}
+export interface WendeUpdateInput extends Partial<CreateWendeRequest>{
+  isPublic?: boolean;
+}
+
+export interface UpdateWendeRequest extends WendeUpdateInput{}
 
 export interface GetAllWendesResponse extends ListResponse<Wende>{}
 export interface GetWendeByIdResponse extends Wende {}

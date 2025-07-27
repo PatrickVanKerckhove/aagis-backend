@@ -8,14 +8,16 @@ import withServer from '../helpers/withServer';
 const data = {
   archeosites: [
     {
-      id:1,
+      id: 1,
       naam: 'test naam 1',
       land: 'test land 1',
       beschrijving: 'test beschrijving 1',
       breedtegraad: new Prisma.Decimal('51'),
       lengtegraad: new Prisma.Decimal('-1.5'),
-      hoogte: new Prisma.Decimal('100.5'),
+      hoogte: 100,
       foto: '/images/testimage1.jpg',
+      createdBy: 1,
+      isPublic: true,
     }],
   wendes: [{
     id:1,
@@ -24,6 +26,9 @@ const data = {
     astronomischEvent: AstronomischEvent.OPGANG,
     datumTijd: new Date(2023, 5, 21, 4, 52),
     azimuthoek: new Prisma.Decimal('50.0'),
+    calculatedBy: 'PhotoEphemerisApp',
+    createdBy: 1,
+    isPublic: true,
   },{
     id: 2,
     siteId: 1,
@@ -31,6 +36,9 @@ const data = {
     astronomischEvent: AstronomischEvent.OPGANG,
     datumTijd: new Date(2023, 11, 22, 8, 9),
     azimuthoek: new Prisma.Decimal('128.0'),
+    calculatedBy: 'PhotoEphemerisApp',
+    createdBy: 1,
+    isPublic: true,
   }],
   markers: [{
     id:1,
@@ -40,6 +48,8 @@ const data = {
     beschrijving: 'test marker beschrijving 1',
     breedtegraad: new Prisma.Decimal('51.18'),
     lengtegraad: new Prisma.Decimal('-1.82'),
+    createdBy: 1,
+    isPublic: true,
   }, {
     id:2,
     siteId: 1,
@@ -48,6 +58,8 @@ const data = {
     beschrijving: 'test marker beschrijving 2',
     breedtegraad: new Prisma.Decimal('53.7'),
     lengtegraad: new Prisma.Decimal('-6.48'),
+    createdBy: 1,
+    isPublic: true,
   }],
 };
 const dataToDelete ={
@@ -105,6 +117,8 @@ describe('OrientatieMarkers', () => {
             beschrijving: 'test marker beschrijving 1',
             breedtegraad: '51.18',
             lengtegraad: '-1.82',
+            createdBy: 1,
+            isPublic: true,
             site: {
               id: 1,
               naam: 'test naam 1',
@@ -112,8 +126,10 @@ describe('OrientatieMarkers', () => {
               beschrijving: 'test beschrijving 1',
               breedtegraad: '51',
               lengtegraad: '-1.5',
-              hoogte: '100.5',
+              hoogte: 100,
               foto: '/images/testimage1.jpg',
+              createdBy: 1,
+              isPublic: true,
             },
             wende: {
               id: 1,
@@ -122,6 +138,9 @@ describe('OrientatieMarkers', () => {
               astronomischEvent: 'OPGANG',
               datumTijd: '2023-06-21T02:52:00.000Z',
               azimuthoek: '50',
+              calculatedBy: 'PhotoEphemerisApp',
+              createdBy: 1,
+              isPublic: true,
             },
           },
           {
@@ -132,6 +151,8 @@ describe('OrientatieMarkers', () => {
             beschrijving: 'test marker beschrijving 2',
             breedtegraad: '53.7',
             lengtegraad: '-6.48',
+            createdBy: 1,
+            isPublic: true,
             site: {
               id: 1,
               naam: 'test naam 1',
@@ -139,8 +160,10 @@ describe('OrientatieMarkers', () => {
               beschrijving: 'test beschrijving 1',
               breedtegraad: '51',
               lengtegraad: '-1.5',
-              hoogte: '100.5',
+              hoogte: 100,
               foto: '/images/testimage1.jpg',
+              createdBy: 1,
+              isPublic: true,
             },
             wende: {
               id: 2,
@@ -149,6 +172,9 @@ describe('OrientatieMarkers', () => {
               astronomischEvent: 'OPGANG',
               datumTijd: '2023-12-22T07:09:00.000Z',
               azimuthoek: '128',
+              calculatedBy: 'PhotoEphemerisApp',
+              createdBy: 1,
+              isPublic: true,
             },
           },
         ]),
@@ -204,6 +230,8 @@ describe('OrientatieMarkers', () => {
         lengtegraad: '-1.5',
         hoogte: '100.5',
         foto: '/images/testimage1.jpg',
+        createdBy: 1,
+        isPublic: true,
       });
     });
   });
