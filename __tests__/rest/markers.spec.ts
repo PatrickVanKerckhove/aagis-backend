@@ -228,7 +228,7 @@ describe('OrientatieMarkers', () => {
         beschrijving: 'test beschrijving 1',
         breedtegraad: '51',
         lengtegraad: '-1.5',
-        hoogte: '100.5',
+        hoogte: 100,
         foto: '/images/testimage1.jpg',
         createdBy: 1,
         isPublic: true,

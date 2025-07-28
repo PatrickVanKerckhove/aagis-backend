@@ -53,8 +53,6 @@ CREATE TABLE `users` (
     `email` VARCHAR(255) NOT NULL,
     `password_hash` VARCHAR(255) NOT NULL,
     `roles` JSON NOT NULL,
-    `createdBy` INTEGER UNSIGNED NULL,
-    `isPublic` BOOLEAN NULL DEFAULT false,
 
     UNIQUE INDEX `idx_user_email_unique`(`email`),
     PRIMARY KEY (`id`)

@@ -1,14 +1,13 @@
 // src/types/user.ts
 import type { Prisma } from '@prisma/client';
-import type { Entity, ListResponse } from './common';
+import type { ListResponse } from './common';
 
-export interface User extends Entity{
+export interface User {
+  id: number;
   naam: string;
   email: string;
   password_hash: string;
   roles: Prisma.JsonValue;
-  createdBy: null;
-  isPublic: null;
 }
 
 export interface PublicUser extends Pick<User, 'id' | 'naam' | 'email' > {}

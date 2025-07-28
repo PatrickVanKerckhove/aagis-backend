@@ -11,6 +11,10 @@ import type { Wende } from '../types/wende';
 import handleDBError from './_handleDBError';
 
 export const getAll = async (userId: number, isAdmin: boolean) : Promise<ArcheologischeSite[]> =>{
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw ServiceError.notFound('Gebruiker niet gevonden.');
+  }
   if (isAdmin){
     return prisma.archeologischeSite.findMany({
       include: {
@@ -22,6 +26,8 @@ export const getAll = async (userId: number, isAdmin: boolean) : Promise<Archeol
             beschrijving: true,
             breedtegraad: true,
             lengtegraad: true,
+            createdBy: true,
+            isPublic: true,
           },
         },
         wendes: {
@@ -31,6 +37,9 @@ export const getAll = async (userId: number, isAdmin: boolean) : Promise<Archeol
             astronomischEvent: true,
             datumTijd: true,
             azimuthoek: true,
+            calculatedBy: true,
+            createdBy: true,
+            isPublic: true,
           },
         },
       },
@@ -52,6 +61,8 @@ export const getAll = async (userId: number, isAdmin: boolean) : Promise<Archeol
           beschrijving: true,
           breedtegraad: true,
           lengtegraad: true,
+          createdBy: true,
+          isPublic: true,
         },
       },
       wendes: {
@@ -61,6 +72,9 @@ export const getAll = async (userId: number, isAdmin: boolean) : Promise<Archeol
           astronomischEvent: true,
           datumTijd: true,
           azimuthoek: true,
+          calculatedBy: true,
+          createdBy: true,
+          isPublic: true,
         },
       },
     },
@@ -68,6 +82,10 @@ export const getAll = async (userId: number, isAdmin: boolean) : Promise<Archeol
 };
 
 export const getById = async (id: number, userId: number, isAdmin: boolean) : Promise<ArcheologischeSite> => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw ServiceError.notFound('Gebruiker niet gevonden.');
+  }
   const archeosite = await prisma.archeologischeSite.findUnique({
     where: { id },
     include:{
@@ -79,6 +97,8 @@ export const getById = async (id: number, userId: number, isAdmin: boolean) : Pr
           beschrijving: true,
           breedtegraad: true,
           lengtegraad: true,
+          createdBy: true,
+          isPublic: true,
         },
       },
       wendes: {
@@ -88,6 +108,9 @@ export const getById = async (id: number, userId: number, isAdmin: boolean) : Pr
           astronomischEvent: true,
           datumTijd: true,
           azimuthoek: true,
+          calculatedBy: true,
+          createdBy: true,
+          isPublic: true,
         },
       },
     },
@@ -105,6 +128,10 @@ export const create = async (
   data : CreateArcheoSiteRequest, userId: number) 
 : Promise<ArcheologischeSite> =>{
   try{
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw ServiceError.notFound('Gebruiker niet gevonden.');
+    }
     const createData: ArcheoSiteCreateInput = {
       ...data,
       createdBy: userId,
@@ -143,9 +170,13 @@ export const updateById = async (
   id: number, 
   changes : ArcheoSiteUpdateInput,
   userId: number,
-  isAdmin: boolean) 
-: Promise<ArcheologischeSite> => {
+  isAdmin: boolean,
+) : Promise<ArcheologischeSite> => {
   try{
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw ServiceError.notFound('Gebruiker niet gevonden.');
+    }
     const archeosite = await prisma.archeologischeSite.findUnique({ where: { id } });
     if (!archeosite) {
       throw ServiceError.notFound('Er is geen archeologische site met dit id.');
@@ -188,6 +219,10 @@ export const updateById = async (
 
 export const deleteById = async (id: number, userId: number, isAdmin: boolean) : Promise<void> => {
   try{
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw ServiceError.notFound('Gebruiker niet gevonden.');
+    }
     const archeosite = await prisma.archeologischeSite.findUnique({ where: { id } });
     if (!archeosite) {
       throw ServiceError.notFound('Er is geen archeologische site met dit id.');
@@ -209,6 +244,10 @@ export const getMarkersBySiteId = async (
   isAdmin: boolean,
 ): Promise<OrientatieMarker[]> =>{
   try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw ServiceError.notFound('Gebruiker niet gevonden.');
+    }
     const site = await prisma.archeologischeSite.findUnique({ where: { id: siteId } });
     if (!site) {
       throw ServiceError.notFound('Er is geen archeologische site met dit id.');
@@ -243,6 +282,10 @@ export const getWendesBySiteId = async (
   isAdmin: boolean,
 ): Promise<Wende[]> =>{
   try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw ServiceError.notFound('Gebruiker niet gevonden.');
+    }
     const site = await prisma.archeologischeSite.findUnique({ where: { id: siteId } });
     if (!site) {
       throw ServiceError.notFound('Er is geen archeologische site met dit id.');

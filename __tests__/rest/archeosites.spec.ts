@@ -143,6 +143,35 @@ describe('Archeosites', () => {
             foto: '/images/testimage1.jpg',
             createdBy: 1,
             isPublic: true,
+            wendes: [{
+              id:1,
+              wendeType: WendeType.ZOMERZONNEWENDE,
+              astronomischEvent: AstronomischEvent.OPGANG,
+              datumTijd: '2023-06-21T02:52:00.000Z',
+              azimuthoek: '50',
+              calculatedBy: 'PhotoEphemerisApp',
+              createdBy: 1,
+              isPublic: true,
+            },{
+              id: 2,
+              wendeType: WendeType.WINTERZONNEWENDE,
+              astronomischEvent: AstronomischEvent.OPGANG,
+              datumTijd: '2023-12-22T07:09:00.000Z',
+              azimuthoek: '128',
+              calculatedBy: 'PhotoEphemerisApp',
+              createdBy: 1,
+              isPublic: true,
+            }],
+            orientatieMarkers: [{
+              id: 1,
+              wendeId: 1,
+              naam: 'test marker 1',
+              beschrijving: 'test marker beschrijving 1',
+              breedtegraad: '51.18',
+              lengtegraad: '-1.82',
+              createdBy: 1,
+              isPublic: true,
+            }],
           },{
             id: 2,
             naam: 'test naam 2',
@@ -154,6 +183,26 @@ describe('Archeosites', () => {
             foto: '/images/testimage2.jpg',
             createdBy: 1,
             isPublic: true,
+            wendes: [{
+              id: 3,
+              wendeType: WendeType.WINTERZONNEWENDE,
+              astronomischEvent: AstronomischEvent.OPGANG,
+              datumTijd: '2023-12-21T07:58:00.000Z',
+              azimuthoek: '134',
+              calculatedBy: 'PhotoEphemerisApp',
+              createdBy: 1,
+              isPublic: true,
+            }],
+            orientatieMarkers: [{
+              id: 2,
+              wendeId: 3,
+              naam: 'test marker 2',
+              beschrijving: 'test marker beschrijving 2',
+              breedtegraad: '53.7',
+              lengtegraad: '-6.48',
+              createdBy: 1,
+              isPublic: true,
+            }],
           },
         ]),
       );
@@ -257,8 +306,6 @@ describe('Archeosites', () => {
           lengtegraad: '-12.8',
           hoogte: 10,
           foto: '/images/testimage.jpg',
-          createdBy: 1,
-          isPublic: true,
         });
 
       expect(response.status).toBe(201);
@@ -270,7 +317,9 @@ describe('Archeosites', () => {
       expect(response.body.lengtegraad).toBe('-12.8');
       expect(response.body.hoogte).toBe(10);
       expect(response.body.foto).toBe('/images/testimage.jpg');
-
+      expect(response.body.createdBy).toBe(1); // Verwacht userId uit authHeader
+      expect(response.body.isPublic).toBe(false); // Verwacht standaardwaarde
+  
       archeositesToDelete.push(response.body.id);
     });
   });

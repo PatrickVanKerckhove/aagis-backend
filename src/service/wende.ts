@@ -11,6 +11,10 @@ import handleDBError from './_handleDBError';
 export const getAll = async (
   userId: number, isAdmin: boolean,
 ):Promise<Wende[]> =>{
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw ServiceError.notFound('Gebruiker niet gevonden.');
+  }
   if (isAdmin) {
     return prisma.wende.findMany({
       include: {
@@ -34,6 +38,10 @@ export const getAll = async (
 export const getById = async (
   id: number, userId: number, isAdmin: boolean,
 ):Promise<Wende> => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw ServiceError.notFound('Gebruiker niet gevonden.');
+  }
   const wende = await prisma.wende.findUnique({
     where: { id },
     include:{
@@ -61,6 +69,10 @@ export const create = async (
   data: CreateWendeRequest, userId: number,
 ) : Promise<Wende> =>{
   try{
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw ServiceError.notFound('Gebruiker niet gevonden.');
+    }
     const createData: WendeCreateInput = {
       ...data,
       createdBy: userId,
@@ -84,6 +96,10 @@ export const updateById = async (
   isAdmin: boolean,
 ) : Promise<Wende> => {
   try{
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw ServiceError.notFound('Gebruiker niet gevonden.');
+    }
     const wende = await prisma.wende.findUnique({ where: { id } });
     if (!wende) {
       throw ServiceError.notFound('Er is geen wende met dit id.');
@@ -112,6 +128,10 @@ export const deleteById = async (
   isAdmin: boolean,
 ) : Promise<void> => {
   try{
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw ServiceError.notFound('Gebruiker niet gevonden.');
+    }
     const wende = await prisma.wende.findUnique({ where: { id } });
     if (!wende) {
       throw ServiceError.notFound('Er is geen wende met dit id.');

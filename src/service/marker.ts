@@ -8,6 +8,10 @@ import type { MarkerCreateInput,
 import handleDBError from './_handleDBError';
 
 export const getAll = async (userId: number, isAdmin: boolean): Promise<OrientatieMarker[]> => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw ServiceError.notFound('Gebruiker niet gevonden.');
+  }
   if (isAdmin) {
     return prisma.orientatieMarker.findMany({
       include: {
@@ -20,6 +24,9 @@ export const getAll = async (userId: number, isAdmin: boolean): Promise<Orientat
             astronomischEvent: true,
             datumTijd: true,
             azimuthoek: true,
+            calculatedBy: true,
+            createdBy: true,
+            isPublic: true,
           },
         },
       },
@@ -42,6 +49,9 @@ export const getAll = async (userId: number, isAdmin: boolean): Promise<Orientat
           astronomischEvent: true,
           datumTijd: true,
           azimuthoek: true,
+          calculatedBy: true,
+          createdBy: true,
+          isPublic: true,
         },
       },
     },
@@ -49,6 +59,10 @@ export const getAll = async (userId: number, isAdmin: boolean): Promise<Orientat
 };
 
 export const getById = async (id: number, userId: number, isAdmin: boolean):Promise<OrientatieMarker> => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw ServiceError.notFound('Gebruiker niet gevonden.');
+  }
   const marker = await prisma.orientatieMarker.findUnique({
     where: { id },
     include:{
@@ -78,6 +92,10 @@ export const create = async (
   data: CreateMarkerRequest, userId: number) 
 : Promise<OrientatieMarker> =>{
   try{
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw ServiceError.notFound('Gebruiker niet gevonden.');
+    }
     const createData: MarkerCreateInput = {
       ...data,
       createdBy: userId,
@@ -101,6 +119,10 @@ export const updateById = async (
   isAdmin: boolean,
 ) : Promise<OrientatieMarker> => {
   try{
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw ServiceError.notFound('Gebruiker niet gevonden.');
+    }
     const marker = await prisma.orientatieMarker.findUnique({ where: { id } });
     if (!marker) {
       throw ServiceError.notFound('Er is geen marker met dit id.');
@@ -125,6 +147,10 @@ export const updateById = async (
 
 export const deleteById = async (id: number, userId: number, isAdmin: boolean): Promise<void> => {
   try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw ServiceError.notFound('Gebruiker niet gevonden.');
+    }
     const marker = await prisma.orientatieMarker.findUnique({ where: { id } });
     if (!marker) {
       throw ServiceError.notFound('Er is geen marker met dit id.');

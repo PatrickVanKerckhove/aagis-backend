@@ -59,8 +59,6 @@ model User{
   email         String   @unique(map: "idx_user_email_unique") @db.VarChar(255)
   password_hash String   @db.VarChar(255)
   roles         Json
-  createdBy     Int?     @db.UnsignedInt
-  isPublic      Boolean? @default(false)
   createdArcheoSites ArcheologischeSite[] @relation("ArcheoSiteCreatedBy")
   createdWendes Wende[] @relation("WendeCreatedBy")
   createdMarkers OrientatieMarker[] @relation("MarkerCreatedBy")

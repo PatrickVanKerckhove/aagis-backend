@@ -114,7 +114,13 @@ export const register = async ({ naam, email, password }: UserCreateInput) : Pro
         roles: [Role.USER], 
       },
     });
-    return await generateJWT(user);
+    return await generateJWT({
+      id: user.id,
+      naam: user.naam,
+      email: user.email,
+      password_hash: user.password_hash,
+      roles: user.roles,
+    });
   } catch(error) {
     throw handleDBError(error);
   };
