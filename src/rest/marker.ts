@@ -292,7 +292,7 @@ const createMarker = async (
 createMarker.validationScheme = {
   body: {
     siteId: Joi.number().integer().positive(),
-    wendeId: Joi.number().integer().positive().allow(null),
+    wendeId: Joi.number().integer().positive().optional().allow(null),
     naam: Joi.string().max(255),
     beschrijving: Joi.optional().allow(null),
     breedtegraad: Joi.number()
