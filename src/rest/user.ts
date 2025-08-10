@@ -21,6 +21,13 @@ import type { Next } from 'koa';
 
 /**
  * @swagger
+ * tags:
+ *   name: Users
+ *   description: Represents a user in the system
+ */
+
+/**
+ * @swagger
  * components:
  *   schemas:
  *     User:
@@ -40,6 +47,14 @@ import type { Next } from 'koa';
  *             id: 123
  *             naam: "Patrick Van Kerckhove"
  *             email: "patrick.vankerckhove@hogent.be"
+ *     UsersList:
+ *       required:
+ *         - items
+ *       properties:
+ *         items:
+ *           type: array
+ *           items:
+ *             $ref: "#/components/schemas/User"
  */
 
 const checkUserId = (ctx: KoaContext<unknown, GetUserRequest>, next: Next) => {
@@ -57,12 +72,63 @@ const checkUserId = (ctx: KoaContext<unknown, GetUserRequest>, next: Next) => {
   return next();
 };
 
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Get all users
+ *     tags:
+ *      - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/UsersList"
+ *       400:
+ *         $ref: '#/components/responses/400BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/401Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/403Forbidden'
+ */
 const getAllUsers = async (ctx: KoaContext<GetAllUsersResponse>) =>{
   const users = await userService.getAll();
   ctx.body = { items: users };      
 };
 getAllUsers.validationScheme = null;
 
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   get:
+ *     summary: Get a single user
+ *     description: Get a single user by their id or your own information if you use 'me' as the id
+ *     tags:
+ *      - Users
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: "#/components/parameters/idParam"
+ *     responses:
+ *       200:
+ *         description: The requested user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/User"
+ *       400:
+ *         $ref: '#/components/responses/400BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/401Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/403Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/404NotFound'
+ */
 const getUserById = async (ctx: KoaContext<GetUserByIdResponse, GetUserRequest>)=>{
   const user = await userService.getById(
     ctx.params.id === 'me' ? ctx.state.session.userId : ctx.params.id,
@@ -79,6 +145,41 @@ getUserById.validationScheme = {
   },
 };
 
+/**
+ * @swagger
+ * /api/users:
+ *   post:
+ *     summary: Register a new user
+ *     tags:
+ *      - Users
+ *     requestBody:
+ *       description: The user's data
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: A JWT token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *       400:
+ *         $ref: '#/components/responses/400BadRequest'
+ */
 const registerUser = async (ctx: KoaContext<LoginResponse, void, CreateUserRequest>) =>{
   const token = await userService.register(ctx.request.body);
   ctx.status = 200;  
@@ -92,6 +193,46 @@ registerUser.validationScheme = {
   },
 };
 
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   put:
+ *     summary: Update an existing user
+ *     tags:
+ *      - Users
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: "#/components/parameters/idParam"
+ *     requestBody:
+ *       description: The user's data
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: The updated user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/User"
+ *       400:
+ *         $ref: '#/components/responses/400BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/401Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/403Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/404NotFound'
+ */
 const updateUser = async (ctx: KoaContext<UpdateUserResponse, IdParams, UpdateUserRequest>)=>{
   const user = await userService.updateById(Number(ctx.params.id), ctx.request.body!);
   ctx.body = user;
@@ -104,6 +245,29 @@ updateUser.validationScheme = {
   },
 };
 
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   delete:
+ *     summary: Delete a user
+ *     tags:
+ *      - Users
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: "#/components/parameters/idParam"
+ *     responses:
+ *       204:
+ *         description: No response, the delete was successful
+ *       400:
+ *         $ref: '#/components/responses/400BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/401Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/403Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/404NotFound'
+ */
 const deleteUser = async (ctx: KoaContext<void, IdParams>)=>{
   await userService.deleteById(Number(ctx.params.id));
   ctx.status = 204;
