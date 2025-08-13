@@ -8,7 +8,11 @@ import type {
   CreateArcheoSiteRequest } from '../types/archeosite';
 import type { OrientatieMarker } from '../types/marker';
 import type { Wende } from '../types/wende';
+import { WendeType, AstronomischEvent } from '@prisma/client';
 import handleDBError from './_handleDBError';
+import SunCalc from 'suncalc';
+import { DateTime } from 'luxon';
+import geoTz from 'geo-tz';
 
 export const getAll = async (userId: number, isAdmin: boolean) : Promise<ArcheologischeSite[]> =>{
   const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -137,8 +141,102 @@ export const create = async (
       createdBy: userId,
       isPublic: false, // Standaard false
     };
-    return await prisma.archeologischeSite.create({
+    const createdSite = await prisma.archeologischeSite.create({
       data: createData,
+    });
+    // Automatically create wendes for zonnewendes using SunCalc and Luxon
+    const lat = createdSite.breedtegraad.toNumber();
+    const lon = createdSite.lengtegraad.toNumber();
+    const height = createdSite.hoogte || 0;
+    const tz = geoTz.find(lat, lon)[0]; // Get timezone for the location
+    const currentYear = DateTime.now().year;
+
+    // Helper function to convert SunCalc azimuth (from south) to standard azimuth (from north, 0-360 degrees)
+    const getStandardAzimuth = (azimuthRadians: number): number => {
+      let azDegrees = (azimuthRadians * 180 / Math.PI + 180) % 360;
+      if (azDegrees < 0) azDegrees += 360;
+      return parseFloat(azDegrees.toFixed(2));
+    };
+
+    // Summer solstice (approx June 21)
+    const summerMidnightLocal = DateTime.fromObject({ year: currentYear, month: 6, day: 21 }, { zone: tz });
+    const summerDateUTC = summerMidnightLocal.toUTC().toJSDate();
+    const summerTimes = SunCalc.getTimes(summerDateUTC, lat, lon, height);
+
+    // Sunrise summer
+    const sunriseSummerUTC = summerTimes.sunrise;
+    const sunriseSummerLocal = DateTime.fromJSDate(sunriseSummerUTC, { zone: 'utc' }).setZone(tz);
+    const azimuthSunriseSummer = getStandardAzimuth(SunCalc.getPosition(sunriseSummerUTC, lat, lon).azimuth);
+
+    // Sunset summer
+    const sunsetSummerUTC = summerTimes.sunset;
+    const sunsetSummerLocal = DateTime.fromJSDate(sunsetSummerUTC, { zone: 'utc' }).setZone(tz);
+    const azimuthSunsetSummer = getStandardAzimuth(SunCalc.getPosition(sunsetSummerUTC, lat, lon).azimuth);
+
+    // Winter solstice (approx December 21)
+    const winterMidnightLocal = DateTime.fromObject({ year: currentYear, month: 12, day: 21 }, { zone: tz });
+    const winterDateUTC = winterMidnightLocal.toUTC().toJSDate();
+    const winterTimes = SunCalc.getTimes(winterDateUTC, lat, lon, height);
+
+    // Sunrise winter
+    const sunriseWinterUTC = winterTimes.sunrise;
+    const sunriseWinterLocal = DateTime.fromJSDate(sunriseWinterUTC, { zone: 'utc' }).setZone(tz);
+    const azimuthSunriseWinter = getStandardAzimuth(SunCalc.getPosition(sunriseWinterUTC, lat, lon).azimuth);
+
+    // Sunset winter
+    const sunsetWinterUTC = winterTimes.sunset;
+    const sunsetWinterLocal = DateTime.fromJSDate(sunsetWinterUTC, { zone: 'utc' }).setZone(tz);
+    const azimuthSunsetWinter = getStandardAzimuth(SunCalc.getPosition(sunsetWinterUTC, lat, lon).azimuth);
+
+    // Create the wendes
+    await prisma.wende.createMany({
+      data: [
+        {
+          siteId: createdSite.id,
+          wendeType: WendeType.ZOMERZONNEWENDE,
+          astronomischEvent: AstronomischEvent.OPGANG,
+          datumTijd: sunriseSummerLocal.toJSDate(),
+          azimuthoek: azimuthSunriseSummer,
+          calculatedBy: 'suncalc',
+          createdBy: userId,
+          isPublic: false,
+        },
+        {
+          siteId: createdSite.id,
+          wendeType: WendeType.ZOMERZONNEWENDE,
+          astronomischEvent: AstronomischEvent.ONDERGANG,
+          datumTijd: sunsetSummerLocal.toJSDate(),
+          azimuthoek: azimuthSunsetSummer,
+          calculatedBy: 'suncalc',
+          createdBy: userId,
+          isPublic: false,
+        },
+        {
+          siteId: createdSite.id,
+          wendeType: WendeType.WINTERZONNEWENDE,
+          astronomischEvent: AstronomischEvent.OPGANG,
+          datumTijd: sunriseWinterLocal.toJSDate(),
+          azimuthoek: azimuthSunriseWinter,
+          calculatedBy: 'suncalc',
+          createdBy: userId,
+          isPublic: false,
+        },
+        {
+          siteId: createdSite.id,
+          wendeType: WendeType.WINTERZONNEWENDE,
+          astronomischEvent: AstronomischEvent.ONDERGANG,
+          datumTijd: sunsetWinterLocal.toJSDate(),
+          azimuthoek: azimuthSunsetWinter,
+          calculatedBy: 'suncalc',
+          createdBy: userId,
+          isPublic: false,
+        },
+      ],
+    });
+
+    // Return the site with includes
+    return await prisma.archeologischeSite.findUnique({
+      where: { id: createdSite.id },
       include: {
         orientatieMarkers: {
           select: {
@@ -160,7 +258,7 @@ export const create = async (
           },
         },
       },  
-    });
+    }) as ArcheologischeSite;
   } catch (error: any) {
     throw handleDBError(error);
   }
