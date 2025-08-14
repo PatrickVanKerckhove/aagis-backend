@@ -5,7 +5,8 @@ export default {
     disabled: false,
   },
   cors: {
-    origins: ['http://localhost:5173'],
+    origins: ['http://localhost:5173', 
+      'http://[::1]:5173'], // nodig voor v6 in FE testen
     maxAge: 3 * 60 * 60, // 3uur (in seconden)
   },
   auth: {
