@@ -6,6 +6,11 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+generator prismaClientJs {
+  provider = "prisma-client-js"
+  seed = "src/data/seed.ts"
+}
 model OrientatieMarker{
   @@map("markers")         // Set the table name to "markers"
   id            Int         @id @default(autoincrement()) @db.UnsignedInt
